@@ -11,4 +11,3 @@ class Config:
                 splitted = clean_line.split("=")
                 main_data[splitted[0]] = splitted[1]  # Todo: make more robust.
         return main_data
-
