@@ -1,0 +1,27 @@
+{
+	"Gods": {
+		"Zeus": {
+			"Age": "blah blah",
+			"Gender": "Male",
+			"Position": "Head Honcho, Hombre!",
+			"Wives": ["Hera"],
+			"Offspring": ["Athena", "Apollo", "Artemis", "Hermes", "Persephone", "Dionysus", "Perseus"],
+			"Public Notes": {
+				"Username1": {
+					"1": {
+						"Title": "fuck you zeus",
+						"Contents": "lol ur a shit get fucked zeus"
+					}
+				}
+			},
+			"Private Notes": {
+				"Username1": {
+					"1": {
+						"Title": "fuck you but privately",
+						"Contents": "I have the hots for you zeus"
+					}
+				}
+			}
+		}
+	}
+}
