@@ -15,7 +15,7 @@ class BaseResource(Resource, DatabaseMixin):
     @classmethod
     def setup(cls, web_app):
         super(BaseResource, cls).setup(web_app)
-        cls._web_app = ref(web_app.db)
+        cls._web_app = ref(web_app)
         return cls
 
     @property

@@ -7,6 +7,7 @@ from flask_restful import Api
 from proj.config_parser import Config
 from proj.database.database_manager import DatabaseManager
 from proj.web.base_resource import BaseResource
+from proj.web.resources.debug.config import DebugConfigResource
 from proj.web.resources.debug.database import DebugDatabaseResource
 from proj.web.resources.index import IndexResource
 
@@ -39,6 +40,7 @@ class WebApp:
         if self.config.config.get("debug") is True:
             # debug routes
             self.register_resource(DebugDatabaseResource)
+            self.register_resource(DebugConfigResource)
 
     def register_resource(self, resource_class: Type[BaseResource]):
         """
