@@ -55,6 +55,34 @@ class DatabaseManager:
                 rethinkdb.table_create(table_name, primary_key=schema.primary_key).run(self.connection)
 
     def migrate(self):
+        """
+        Finds and runs migrations for all tables in the database.
+
+        A migration is a script that manipulates the contents of a table inside the database
+        at the startup of the application.
+
+        The point of migrations is usually to "migrate" data from an older schema version to
+        the current schema. This prevents data loss when the schema is changed in newer versions.
+
+        Migrations are sequential and per-table. To create a migration, a file (vX.py, X being
+        the migration number starting from 1 and increasing sequentially) is added in a module
+        with the name of the table, inside the proj.database.migrations module.
+
+        For example, to create the first migration for the "users" table, a file named "v1.py"
+        would be added to the new proj.database.migrations.users module. Later migrations
+        would be added to that module (v2.py, v3.py, etc.)
+
+        Each migration file should consist of a function called "migrate", accepting two parameters:
+            1. The instance of this DatabaseManager ("db")
+            2. The name of the table being migrated ("table")
+
+        After all migrations are successfully executed for a table, the last migration number to
+        have been executed is written to the "_migrations" table. For example, if migration #2 for
+        table "users" has been executed, the "_migrations" table will contain
+            {"table_name": "users", "version": 2}
+
+        This way, migrations will never be run twice on the same database.
+        """
         migrations_table = "_migrations"
         migrations_directory = os.path.abspath(os.path.join(".", "proj", "database", "migrations"))
         table_names = SCHEMA.keys()
