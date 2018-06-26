@@ -25,6 +25,12 @@ class DatabaseManager:
         return rethinkdb.connect(host=self.ip, port=self.port, db=self.database_name)
 
     def get_doc(self, table, key):
+        """
+        Gets a single document with the given primary key value in the given table.
+        :param table: the table to lookup
+        :param key: the primary key (usually an ID) of the document to find
+        :return: a dict containing the document's fields, or None if no such document exists
+        """
         doc = rethinkdb.table(table).get(key).run(self.connection)
         return dict(doc) if doc else None
 
@@ -102,6 +108,7 @@ class DatabaseManager:
                     raise
 
     def attach_flask(self, app: Flask):
+        # Attach flask request handlers and other settings
         app.before_request(self._flask_before_request)
         app.teardown_request(self._flask_teardown_request)
 

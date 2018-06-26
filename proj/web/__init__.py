@@ -19,7 +19,7 @@ class WebApp:
 
         # todo: remove this, use proper route manager
         @self.app.route('/', methods=["GET"])
-        def base_route():
+        def index_route():
             return jsonify(
                 {
                     "database_connected": self.db.connection.is_open()
