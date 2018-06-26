@@ -12,29 +12,47 @@ log = logging.getLogger(__name__)
 
 
 class DatabaseManager:
+    """
+    Contains methods to connect and interact with a RethinkDB database.
+    """
+
     def __init__(self, config: Config):
+        """
+        Creates a new instance of the DatabaseManager.
+        :param config: the configuration instance
+        """
         self.ip = config.get("database", "ip")
         self.port = int(config.get("database", "port"))
         self.database_name = config.get("database", "database_name")
         self.connection = None
 
+        # Connect to the RethinkDB instance and try to create the database, if necessary
         with self.connect() as self.connection:
             self.try_create_database()
 
     def connect(self):
+        """
+        Opens a connection to the configured RethinkDB database
+        :return: a new connection to a RethinkDB database
+        """
         return rethinkdb.connect(host=self.ip, port=self.port, db=self.database_name)
 
-    def get_doc(self, table, key):
+    def get_doc(self, table, key, default=None):
         """
         Gets a single document with the given primary key value in the given table.
         :param table: the table to lookup
         :param key: the primary key (usually an ID) of the document to find
-        :return: a dict containing the document's fields, or None if no such document exists
+        :param default: a default value if the document doesn't exist
+        :return: a dict containing the document's fields, or the default parameter if no such document exists
         """
         doc = rethinkdb.table(table).get(key).run(self.connection)
-        return dict(doc) if doc else None
+        return dict(doc) if doc else default
 
     def try_create_database(self):
+        """
+        Attempts to create a new database, as configured in the YAML configuration.
+        If the database already exists, nothing happens.
+        """
         try:
             rethinkdb.db_create(self.database_name).run(self.connection)
             log.debug("Created database '{0}'.".format(self.database_name))
@@ -42,27 +60,47 @@ class DatabaseManager:
             log.debug("Failed to create database '{0}'; already exists.".format(self.database_name))
 
     def create_tables(self):
+        """
+        Creates all tables that do not already exist in the database.
+        These tables are defined in the schema (schema.py).
+        """
         with self.connect() as self.connection:
             # find the existing tables first
-            existing_tables = rethinkdb.db(self.database_name).table_list().run(self.connection)
+            existing_tables = self.table_list().run(self.connection)
             log.debug(f"Found {len(existing_tables)} table(s): {str(existing_tables)}.")
 
             for table_name, schema in SCHEMA.items():
                 if table_name in existing_tables:
+                    # Table is already in the database, skip
                     continue
 
                 log.debug(f"Creating new table '{table_name}'.")
                 rethinkdb.table_create(table_name, primary_key=schema.primary_key).run(self.connection)
 
     def query(self, table_name: str):
+        """
+        Creates a new query for the given table.
+        :param table_name: the name of the table to query
+        :return: a new query for this table
+        """
         if table_name not in SCHEMA:
             raise Exception("Table not in schema: {0}".format(table_name))
         return rethinkdb.table(table_name)
 
     def table_list(self):
+        """
+        Creates a new query returning the list of tables inside the database.
+        :return: a list of tables in the database.
+        """
         return rethinkdb.table_list()
 
     def run(self, query):
+        """
+        Runs a query. If a connection is already open to the database, this connection is used.
+        If not, a new connection is created and then closed.
+        :param query: the query.
+        :return: the result of the query.
+        """
         if not self.connection.is_open():
             with self.connect() as self.connection:
                 return self.connection.run(query)
@@ -156,11 +194,11 @@ class DatabaseManager:
         app.teardown_request(self._flask_teardown_request)
 
     def _flask_before_request(self):
-        # connect to the database
+        # Create a connection to database before a request
         self.connection = self.connect()
 
     def _flask_teardown_request(self, exception):
-        # close the connection
+        # Close the database connection after a request is complete.
         try:
             self.connection.close()
         except AttributeError:

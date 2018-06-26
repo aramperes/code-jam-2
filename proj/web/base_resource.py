@@ -8,6 +8,7 @@ from proj.database.mixin import DatabaseMixin
 class BaseResource(Resource, DatabaseMixin):
     """
     A class combining the Flask-RESTful Resource and the RethinkDB mixin.
+    All resources should extend this class to be registered in the WebApp.
     """
     url = ""
     name = ""

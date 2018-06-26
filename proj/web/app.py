@@ -13,6 +13,10 @@ from proj.web.resources.index import IndexResource
 
 
 class WebApp:
+    """
+    The API web application.
+    """
+
     def __init__(self, config: Config):
         self.config = config
 
@@ -56,6 +60,9 @@ class WebApp:
         )
 
     def serve(self):
+        """
+        Serves the Flask application using the waitress WSGI.
+        """
         waitress.serve(self.app,
                        host=self.config.get("web", "ip"),
                        port=self.config.get("web", "port"))
