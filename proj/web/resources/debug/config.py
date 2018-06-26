@@ -6,4 +6,4 @@ class DebugConfigResource(BaseResource):
     name = "api.debug.config"
 
     def get(self):
-        return self.web_app.config.config
+        return self.web_app.config.get()
