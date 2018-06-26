@@ -1,9 +1,12 @@
+from typing import Type
+
 import waitress
 from flask import Flask
 from flask_restful import Api
 
 from proj.config_parser import Config
 from proj.database.database_manager import DatabaseManager
+from proj.web.base_resource import BaseResource
 from proj.web.resources.index import IndexResource
 
 
@@ -33,7 +36,7 @@ class WebApp:
 
         self.register_resource(IndexResource)
 
-    def register_resource(self, resource_class):
+    def register_resource(self, resource_class: Type[BaseResource]):
         """
         Registers a resource to the Flask-RESTful API instance
         :param resource_class: the class of the resource

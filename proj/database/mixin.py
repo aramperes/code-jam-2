@@ -1,7 +1,5 @@
 from weakref import ref
 
-from flask_restful import Resource
-
 from proj.database.database_manager import DatabaseManager
 
 
@@ -18,11 +16,3 @@ class DatabaseMixin:
     @property
     def db(self) -> DatabaseManager:
         return self._db()
-
-
-class ResourceWithDatabase(Resource, DatabaseMixin):
-    """
-    A class combining the Flask-RESTful Resource and the RethinkDB mixin.
-    """
-    url = ""
-    name = ""

@@ -1,7 +1,7 @@
-from proj.database.mixin import ResourceWithDatabase
+from proj.web.base_resource import BaseResource
 
 
-class IndexResource(ResourceWithDatabase):
+class IndexResource(BaseResource):
     url = "/"
     name = "api.index"
 
