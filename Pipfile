@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 flask = "==1.0.2"
+pyyaml = "==3.12"
 
 [dev-packages]
 "flake8" = "*"
