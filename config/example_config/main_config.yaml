@@ -1,8 +1,17 @@
 web:
-    ip: "0.0.0.0"
-    port: 80
+  # Flask (web) configuration
+  ip: "0.0.0.0"
+  port: 80
+
+database:
+  # RethinkDB configuration
+  ip: "127.0.0.1"
+  port: 28015
+  database_name: "battle_myth_theater"
+
 admin:
-    username: "admin"                        #Insecure, change from example credentials.
-    password: "admin"                        #Insecure, change from example credentials.
+  username: "admin"                        #Insecure, change from example credentials.
+  password: "admin"                        #Insecure, change from example credentials.
+
 user:
-    allow_multiple_accounts_from_ip: true    #Allow multiple registrations from a single IP?
+  allow_multiple_accounts_from_ip: true    #Allow multiple registrations from a single IP?

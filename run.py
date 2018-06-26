@@ -1,10 +1,14 @@
+import logging
 import os
 
-from proj import app
 from proj.config_parser import Config
+from proj.web import WebApp
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
+
     config_file = os.path.join("config", "main_config.yaml")
     MAIN_CONFIG = Config(config_file)
 
-    app.run(host=MAIN_CONFIG.config["web"]["ip"], port=int(MAIN_CONFIG.config["web"]["port"]))
+    web = WebApp(MAIN_CONFIG)
+    web.serve()
