@@ -13,9 +13,9 @@ log = logging.getLogger(__name__)
 
 class DatabaseManager:
     def __init__(self, config: Config):
-        self.ip = config.config["database"]["ip"]
-        self.port = int(config.config["database"]["port"])
-        self.database_name = config.config["database"]["database_name"]
+        self.ip = config.get("database", "ip")
+        self.port = int(config.get("database", "port"))
+        self.database_name = config.get("database", "database_name")
         self.connection = None
 
         with self.connect() as self.connection:

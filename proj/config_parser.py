@@ -10,6 +10,14 @@ class Config:
         # Call helper funcs
         self.load_config()
 
+    def get(self, *args, default=None):
+        current = self.config
+        for arg in args:
+            if arg not in current:
+                return default
+            current = current[arg]
+        return current
+
     def load_config(self):
         # Can also be called by itself to reload config.
         with open(self.config_file) as config_stream:

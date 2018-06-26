@@ -37,7 +37,7 @@ class WebApp:
         # todo: auto-discovery?
 
         self.register_resource(IndexResource)
-        if self.config.config.get("debug") is True:
+        if self.config.get("debug") is True:
             # debug routes
             self.register_resource(DebugDatabaseResource)
             self.register_resource(DebugConfigResource)
@@ -57,5 +57,5 @@ class WebApp:
 
     def serve(self):
         waitress.serve(self.app,
-                       host=self.config.config["web"]["ip"],
-                       port=self.config.config["web"]["port"])
+                       host=self.config.get("web", "ip"),
+                       port=self.config.get("web", "port"))
