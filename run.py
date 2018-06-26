@@ -2,7 +2,7 @@ import logging
 import os
 
 from proj.config_parser import Config
-from proj.web import WebApp
+from proj.web.app import WebApp
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)

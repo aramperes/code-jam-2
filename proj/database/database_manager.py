@@ -54,6 +54,21 @@ class DatabaseManager:
                 log.debug(f"Creating new table '{table_name}'.")
                 rethinkdb.table_create(table_name, primary_key=schema.primary_key).run(self.connection)
 
+    def query(self, table_name: str):
+        if table_name not in SCHEMA:
+            raise Exception("Table not in schema: {0}".format(table_name))
+        return rethinkdb.table(table_name)
+
+    def table_list(self):
+        return rethinkdb.table_list()
+
+    def run(self, query):
+        if not self.connection.is_open():
+            with self.connect() as self.connection:
+                return self.connection.run(query)
+        else:
+            return query.run(self.connection)
+
     def migrate(self):
         """
         Finds and runs migrations for all tables in the database.
