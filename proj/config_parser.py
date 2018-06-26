@@ -3,6 +3,7 @@ import yaml
 
 class Config:
     def __init__(self, config_file):
+        self.config = None
         # Assign config file location to class variable
         self.config_file = config_file
 

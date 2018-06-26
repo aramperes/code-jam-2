@@ -1,8 +1,8 @@
 #Data in the data folder is ignored in git. This is to minimize mistakes such as uploading the password db to a public repo.
-proj/data/*.*
+data/*.*
 
 #Config should be serverside, so it is ignored as well.
-proj/config/*.*
+config/*.*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
