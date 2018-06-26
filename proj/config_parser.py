@@ -1,13 +1,22 @@
+import yaml
+
+
 class Config:
-    def parse(file_loc):
-        main_data = {}
-        with open(file_loc, 'r') as main_file:
-            for line in main_file.readlines():
-                clean_line = line.replace(" ", "").rstrip()
-                if clean_line.startswith('#') or len(clean_line) == 0:
-                    continue
-                if clean_line.find('=') == -1:
-                    raise SyntaxError("Config missing = on a line.")  # Todo: make more informative.
-                splitted = clean_line.split("=")
-                main_data[splitted[0]] = splitted[1]  # Todo: make more robust.
-        return main_data
+    def __init__(self, config_file):
+        # Assign config file location to class variable
+        self.config_file = config_file
+
+        # Call helper funcs
+        self.load_config()
+
+    def load_config(self):
+        # Can also be called by itself to reload config.
+        with open(self.config_file) as config_stream:
+            self.config = yaml.load(config_stream)
+
+    def change_config_file(self, config_file, reload=True):
+        # Used to change which config the pointer points to.
+        self.config_file = config_file
+
+        if reload:
+            self.load_config()
