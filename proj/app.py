@@ -1,4 +1,6 @@
+from config_parser import Config
 from flask import Flask, request
+
 
 app = Flask(__name__)
 
@@ -11,3 +13,8 @@ def get_env():
         return 'Data coming soon.'
     else:
         return 'Please enter a god\'s name from greek mythology!'
+
+
+if __name__ == "__main__":
+    MAIN_CONFIG = Config.parse("config/main_config.config")
+    app.run(host=MAIN_CONFIG["IP"], port=MAIN_CONFIG["PORT"])
