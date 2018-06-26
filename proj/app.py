@@ -17,4 +17,4 @@ def get_env():
 
 if __name__ == "__main__":
     MAIN_CONFIG = Config.parse("config/main_config.config")
-    app.run(debug=True, host=MAIN_CONFIG["IP"], port=MAIN_CONFIG["PORT"])
+    app.run(host=MAIN_CONFIG["IP"], port=MAIN_CONFIG["PORT"])
