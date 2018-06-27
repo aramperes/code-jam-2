@@ -19,9 +19,8 @@ SCHEMA = {
         ]
     ),
     "users": TableSchema(
-        primary_key="id",
+        primary_key="username",
         keys=[
-            "id",
             "username",
             "password_hash"
         ]
