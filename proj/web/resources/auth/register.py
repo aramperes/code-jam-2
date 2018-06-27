@@ -1,20 +1,21 @@
 import bcrypt
 from flask import request
+from werkzeug.exceptions import BadRequest, Unauthorized
 
 from proj.web.base_resource import BaseResource
 
 
 class RegisterResource(BaseResource):
     """
-    The register endpoint (/register).
+    The register endpoint (/auth/register).
     """
-    url = "/register"
-    name = "api.register"
+    url = "/auth/register"
+    name = "api.auth.register"
 
     def post(self):
         data = request.json or {}
         if 'username' not in data or 'password' not in data:
-            return {'success': False, 'reason': 'Provide a username and a password.'}
+            raise BadRequest(description="Provide a username and a password to register.")
 
         # Makes sure the input credentials are strings
         username = str(data["username"])
@@ -27,7 +28,7 @@ class RegisterResource(BaseResource):
         username_taken = len(users) > 0
         if username_taken:
             # There are more than 0 users with that username, so it must be taken.
-            return {'success': False, 'reason': 'Username is already taken.'}
+            raise Unauthorized(description="Username is already taken.")
 
         # The dictionary (document) to insert in the database
         user_info = {

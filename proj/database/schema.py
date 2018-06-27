@@ -25,5 +25,20 @@ SCHEMA = {
             "username",
             "password_hash"
         ]
+    ),
+    "oauth_tokens": TableSchema(
+        primary_key="token",
+        keys=[
+            "token",
+            "user_id",
+            "expires"
+        ]
+    ),
+    "oauth_refresh_tokens": TableSchema(
+        primary_key="refresh_token",
+        keys=[
+            "refresh_token",
+            "user_id"
+        ]
     )
 }
