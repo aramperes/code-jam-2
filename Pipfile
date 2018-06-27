@@ -17,6 +17,11 @@ bcrypt = "*"
 "flake8-bandit" = "*"
 "flake8-import-order" = "*"
 "flake8-tidy-imports" = "*"
+pytest = "*"
+pytest-dependency = "*"
 
 [requires]
 python_version = "3.6"
+
+[scripts]
+test = "pytest tests -s --log-cli-level=DEBUG"

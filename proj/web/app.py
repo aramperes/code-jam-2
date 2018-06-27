@@ -34,7 +34,7 @@ class WebApp:
         self.db.attach_flask(self.app)
 
         # Flask-RESTful setup
-        self.api = Api()
+        self.api = Api(catch_all_404s=True)
         self.register_resources()
         self.api.init_app(self.app)
 

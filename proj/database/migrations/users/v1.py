@@ -11,3 +11,5 @@ def migrate(db: DatabaseManager, table):
         # create secondary index
         create_index_query = db.query(table).index_create("username")
         db.run(create_index_query)
+        wait_index_query = db.query(table).index_wait("username")
+        db.run(wait_index_query)
