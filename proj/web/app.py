@@ -10,6 +10,7 @@ from proj.web.base_resource import BaseResource
 from proj.web.resources.debug.config import DebugConfigResource
 from proj.web.resources.debug.database import DebugDatabaseResource
 from proj.web.resources.index import IndexResource
+from proj.web.resources.param_demo import ParamDemoResource
 
 
 class WebApp:
@@ -41,6 +42,7 @@ class WebApp:
         # todo: auto-discovery?
 
         self.register_resource(IndexResource)
+        self.register_resource(ParamDemoResource)
         if self.config.get("debug") is True:
             # debug routes
             self.register_resource(DebugDatabaseResource)
