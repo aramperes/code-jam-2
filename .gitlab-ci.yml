@@ -3,6 +3,9 @@ image: python:3.6.5-stretch
 services:
   - rethinkdb:2.3.6
 
+variables:
+  RETHINKDB_HOST: "rethinkdb"
+
 stages:
   - test
 

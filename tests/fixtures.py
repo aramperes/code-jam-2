@@ -1,4 +1,5 @@
 import logging
+import os
 
 import pytest
 import rethinkdb
@@ -13,7 +14,7 @@ class ConfigShim(Config):
     def __init__(self):
         self.config = {
             "database": {
-                "ip": "127.0.0.1",
+                "ip": os.environ.get("RETHINKDB_HOST", default="127.0.0.1"),
                 "port": 28015,
                 "database_name": "temp_test_database"
             },
