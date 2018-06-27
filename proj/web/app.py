@@ -7,11 +7,13 @@ from flask_restful import Api
 from proj.config_parser import Config
 from proj.database.database_manager import DatabaseManager
 from proj.web.base_resource import BaseResource
+from proj.web.resources.auth.login import LoginResource
+from proj.web.resources.auth.refresh import RefreshTokenResource
+from proj.web.resources.auth.register import RegisterResource
 from proj.web.resources.debug.config import DebugConfigResource
 from proj.web.resources.debug.database import DebugDatabaseResource
 from proj.web.resources.index import IndexResource
-from proj.web.resources.login import LoginResource
-from proj.web.resources.register import RegisterResource
+from proj.web.resources.user import UserResource
 
 
 class WebApp:
@@ -43,8 +45,11 @@ class WebApp:
         # todo: auto-discovery?
 
         self.register_resource(IndexResource)
+        self.register_resource(UserResource)
+        # Authentication resources
         self.register_resource(LoginResource)
         self.register_resource(RegisterResource)
+        self.register_resource(RefreshTokenResource)
         if self.config.get("debug") is True:
             # debug routes
             self.register_resource(DebugDatabaseResource)
