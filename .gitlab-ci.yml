@@ -1,7 +1,4 @@
-# This file is used by GitLab to tell it how to build and test your code.
-# You probably don't need to modify this - please don't touch it unless you're absolutely sure you need to.
-
-image: pythondiscord/site-ci:latest
+image: python:3.6.5-stretch
 
 stages:
   - test
@@ -14,6 +11,7 @@ test:
 
   script:
     # Install dependencies
+    - apt-get install build-essential libffi-dev python-dev
     - pip install pipenv
     - pipenv sync --dev
 
