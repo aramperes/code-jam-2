@@ -1,6 +1,7 @@
-from proj.web.base_resource import BaseResource
-from flask import request
 import bcrypt
+from flask import request
+
+from proj.web.base_resource import BaseResource
 
 
 class RegisterResource(BaseResource):
