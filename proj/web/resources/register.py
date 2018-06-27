@@ -1,5 +1,5 @@
 from proj.web.base_resource import BaseResource
-from flask import jsonify, request
+from flask import request
 import bcrypt
 
 
@@ -12,9 +12,8 @@ class RegisterResource(BaseResource):
 
     def post(self):
         data = request.json or {}
-        if not data:
-            resp = {'success': False, 'reason': 'Enter a username and a password.'}
-            return jsonify(resp)
+        if 'username' not in data or 'password' not in data:
+            return {'success': False, 'reason': 'Enter a username and a password.'}
 
         # The dictionary (document) to insert in the database
         user_info = {
@@ -35,8 +34,7 @@ class RegisterResource(BaseResource):
         username_taken = self.db.run(check_user_query) > 0
         if username_taken:
             # There are more than 0 users with that username, so it must be taken.
-            resp = {'success': False, 'reason': 'Username already taken.'}
-            return jsonify(resp)
+            return {'success': False, 'reason': 'Username already taken.'}
 
         # The username isn't taken, so let's add the user.
         # We have to create a query to the table we want to insert a document into
@@ -44,5 +42,4 @@ class RegisterResource(BaseResource):
         # Run the query in the database
         self.db.run(insert_query)
 
-        resp = {'success': True}
-        return jsonify(resp)
+        return {'success': True}

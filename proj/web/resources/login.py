@@ -1,5 +1,5 @@
 from proj.web.base_resource import BaseResource
-from flask import jsonify, request
+from flask import request
 import bcrypt
 
 
@@ -13,9 +13,8 @@ class LoginResource(BaseResource):
     def post(self):
         data = request.json or {}
 
-        if not data:
-            resp = {'success': False, 'reason': 'enter a username and password'}
-            return jsonify(resp)
+        if 'username' not in data or 'password' not in data:
+            return {'success': False, 'reason': 'enter a username and password'}
 
         user_by_username_query = self.db.query("users").filter(
             {
@@ -25,16 +24,13 @@ class LoginResource(BaseResource):
         users = self.db.run(user_by_username_query)
 
         if not users:  # this checks if the users array is empty
-            resp = {'success': False, 'reason': 'No user found. Use the /register endpoint to register for an account.'}
-            return jsonify(resp)
+            return {'success': False, 'reason': 'No user found. Use the /register endpoint to register for an account.'}
 
         user_document = users[0]
         password_hash = user_document["password_hash"]
 
-        if bcrypt.checkpw(data.get('password'), password_hash):
-            resp = {'success': True}
+        if bcrypt.checkpw(data.get('password').encode(), password_hash.encode()):
             # create id param for game room
-            return jsonify(resp)
+            return {'success': True}
         else:
-            resp = {'success': False, 'reason': 'Incorrect password.'}
-            return jsonify(resp)
+            return {'success': False, 'reason': 'Incorrect password.'}
