@@ -48,6 +48,16 @@ class DatabaseManager:
         doc = rethinkdb.table(table).get(key).run(self.connection)
         return dict(doc) if doc else default
 
+    def get_all(self, table, key, index):
+        """
+        Gets all documents with the given key and the specified secondary index in the given table.
+        :param table the table to lookup
+        :param key: the key value of the documents to find
+        :param index: the secondary index to lookup against
+        :return an array containing the documents that match the given key
+        """
+        return rethinkdb.table(table).get_all(key, index=index).coerce_to("array").run(self.connection)
+
     def try_create_database(self):
         """
         Attempts to create a new database, as configured in the YAML configuration.
