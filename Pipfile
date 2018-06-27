@@ -4,11 +4,12 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-flask = "==1.0.2"
-pyyaml = "==3.12"
+Flask = "==1.0.2"
+PyYAML = "==3.12"
 rethinkdb = "==2.3.0.post6"
 waitress = "==1.1.0"
-flask-restful = "==0.3.6"
+Flask-RESTful = "==0.3.6"
+bcrypt = "*"
 
 [dev-packages]
 "flake8" = "*"

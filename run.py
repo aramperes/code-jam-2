@@ -5,10 +5,10 @@ from proj.config_parser import Config
 from proj.web.app import WebApp
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG, format="[%(levelname)s] %(name)s: %(message)s")
 
     config_file = os.path.join("config", "main_config.yaml")
-    MAIN_CONFIG = Config(config_file)
+    main_config = Config(config_file)
 
-    web = WebApp(MAIN_CONFIG)
+    web = WebApp(main_config)
     web.serve()
