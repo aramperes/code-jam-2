@@ -11,6 +11,7 @@ test:
 
   script:
     # Install dependencies
+    - apt-get update
     - apt-get install build-essential libffi-dev python-dev
     - pip install pipenv
     - pipenv sync --dev
