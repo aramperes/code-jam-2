@@ -1,5 +1,8 @@
 image: python:3.6.5-stretch
 
+services:
+  - rethinkdb:2.3.6
+
 stages:
   - test
 
@@ -10,11 +13,15 @@ test:
   stage: test
 
   script:
-    # Install dependencies
+
+    # Install python dependencies
     - apt-get update
     - apt-get -y install build-essential libffi-dev python-dev
     - pip install pipenv
     - pipenv sync --dev
+
+    # Test
+    - pipenv run test
 
     # Lint
     - pipenv run flake8

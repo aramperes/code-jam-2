@@ -4,6 +4,9 @@ data/*.*
 #Config should be serverside, so it is ignored as well.
 config/*.*
 
+# Test cache
+.pytest_cache/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
