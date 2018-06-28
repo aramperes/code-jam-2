@@ -1,6 +1,5 @@
-from proj.database.database_manager import DatabaseManager
 from proj.web.base_resource import BaseResource
-
+from proj.web.oauth import oauth
 
 class UserResource(BaseResource):
     """
