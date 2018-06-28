@@ -40,5 +40,44 @@ SCHEMA = {
             "refresh_token",
             "user_id"
         ]
+    ),
+    "characters": TableSchema(
+        primary_key="id",
+        keys=[
+            "id",
+            "user_id",
+            "name",
+            "description",
+            "strength",
+            "dexterity",
+            "health",
+            "special"
+        ]
+    ),
+    "games": TableSchema(
+        primary_key="id",
+        keys=[
+            "id",
+            "challenger_username",
+            "defender_username",
+            "challenger_character",
+            "challenger_character_stats",
+            "defender_character",
+            "defender_character_stats",
+            "stats",
+            "turn",
+            "turn_number",
+            "max_turns",
+        ]
+    ),
+    "challenges": TableSchema(
+        primary_key="id",
+        keys=[
+            "id",
+            "challenger_username",
+            "defender_username",
+            "challenger_character",
+            "max_turns"
+        ]
     )
 }
