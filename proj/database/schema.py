@@ -45,7 +45,7 @@ SCHEMA = {
         primary_key="id",
         keys=[
             "id",
-            "user_id",
+            "owner",
             "name",
             "description",
             "strength",

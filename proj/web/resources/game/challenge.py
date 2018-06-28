@@ -1,5 +1,5 @@
 from flask import request
-from werkzeug.exceptions import BadRequest
+from werkzeug.exceptions import BadRequest, Unauthorized
 
 from proj.web.base_resource import BaseResource
 from proj.web.oauth import oauth
@@ -36,10 +36,16 @@ class ChallengeResource(BaseResource):
         if not defender:  # Does the defender exist in the database?
             return BadRequest(description="Defender does not exist in database.")
 
-        character = self.db.get_all("characters", data['challenge_config']['character'])
-        if not character:
+        character = self.db.get_all("characters", data['challenge_config']['character'], "name")
+        if not character:  # Does the character exist in the database?
             return BadRequest(description="Character does not exist.")
 
+        # Checking if the character is owned by the challenger.
+        character_ownership = self.db.query("characters").filter(lambda character: 
+            character['name'].contains(data["challenge_config"]["character"]))
+
+        if not self.db.run(character_ownership)[0]["owner"] == self.user_data["username"]:
+            return Unauthorized(description="Character does not belong to you.")
 
         # All the checks passed, let's set up a document to insert into the database.
         challenge_data = {

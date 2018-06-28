@@ -14,6 +14,6 @@ admin:
   password: "admin"                        #Insecure, change from example credentials.
 
 user:
-  allow_multiple_accounts_from_ip: true    #Allow multiple registrations from a single IP?
+  max_stat_points: 20
 
 debug: true
