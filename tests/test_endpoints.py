@@ -173,6 +173,22 @@ def test_play_story(client: client):
 
 
 @pytest.mark.dependency(depends=["test_play_story"])
+def test_edit_story(client: client):
+    # edit story (without auth)
+    response = client.put("/story/{0}".format(VARS["story_private"]["id"]), json={"public": True})
+    assert_json_status(response, Unauthorized.code)
+
+    # edit story (with auth)
+    response = client.put("/story/{0}".format(VARS["story_private"]["id"]), json={"public": True},
+                          headers=with_auth_headers())
+    assert_json_status(response, OK_STATUS)
+
+    # check if story is now public
+    response = client.get("/story/{0}".format(VARS["story_private"]["id"]))
+    assert_json_status(response, OK_STATUS)
+
+
+@pytest.mark.dependency(depends=["test_play_story"])
 def test_delete_story(client: client):
     # delete story (without auth)
     response = client.delete("/story/{0}".format(VARS["story_public"]["id"]))

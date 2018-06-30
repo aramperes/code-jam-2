@@ -1,3 +1,4 @@
+from flask import request
 from rethinkdb import ReqlNonExistenceError
 from werkzeug.exceptions import NotFound, Unauthorized
 
@@ -45,6 +46,26 @@ class StoryResource(BaseResource):
 
         delete_query = self.db.query("stories").get(story_id).delete()
         self.db.run(delete_query)
+        return {
+            "success": True
+        }
+
+    @oauth(force=True)
+    def put(self, story_id):
+        data = request.json or {}
+        # Only editing the privacy of the story is currently possible
+        story = self.db.get_doc("stories", story_id)
+        if not story:
+            raise NotFound()
+
+        if story["user_id"] != self.user_data["id"]:
+            raise Unauthorized()
+
+        if "public" in data:
+            story["public"] = bool(data["public"])
+
+        insert_query = self.db.query("stories").insert(story, conflict="update", durability="soft")
+        self.db.run(insert_query)
         return {
             "success": True
         }
