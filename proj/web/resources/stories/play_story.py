@@ -1,6 +1,6 @@
 from flask import make_response
 from rethinkdb import ReqlNonExistenceError
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import NotFound, Unauthorized
 
 from proj.web.base_resource import BaseResource
 from proj.web.oauth import oauth
@@ -18,6 +18,10 @@ class PlayStoryResource(BaseResource):
             story = self.db.run(story_query)
         except ReqlNonExistenceError:
             raise NotFound()
+
+        is_own = self.authenticated and story["user_id"] == self.user_data["id"]
+        if not story["public"] and not is_own:
+            raise Unauthorized("The story you requested has been marked as private by its author.")
 
         media = story["media"]
 

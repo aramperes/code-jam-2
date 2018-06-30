@@ -23,8 +23,8 @@ class CreateStoryResource(BaseResource):
         # optional parameter: public (true/false), default true
         # optional parameter: music (true/false), default true
 
-        public = bool(data.get("public") or True)
-        music = bool(data.get("music") or True)
+        public = bool(data.get("public", True))
+        music = bool(data.get("music", True))
 
         corpus_path = os.path.join(".", "assets", "texts", "texts.txt")
         if not os.path.exists(corpus_path):
@@ -55,7 +55,6 @@ class CreateStoryResource(BaseResource):
             tts_binary = tts_buffer.read()
 
         if music:
-            print("Using music")
             music_path = os.path.join(".", "assets", "music", "track.mp3")
             # todo: randomize music start
             music_time_start = 100  # seconds
@@ -66,9 +65,9 @@ class CreateStoryResource(BaseResource):
             # 3. Finally, the two audio tracks are mixed together to produce one track
             ffmpeg_filter = "-filter_complex " \
                             "[0:a]volume=1[a0];[1:a]volume=0.1[a1];" \
-                            "[a1]atrim=start=100[a1];" \
+                            "[a1]atrim=start={music_start}[a1];" \
                             "[a0][a1]amix=inputs=2:duration=shortest:dropout_transition=3[a]" \
-                            " -map \"[a]\" -f mp3"
+                            " -map \"[a]\" -f mp3".format(music_start=music_time_start)
 
             # The first track (TTS) is piped from the stream
             # The second track (music) is read from file by FFMPEG
@@ -86,7 +85,6 @@ class CreateStoryResource(BaseResource):
             mixed_bytes, stderr = ff.run(input_data=tts_binary, stdout=subprocess.PIPE)
             media_output = mixed_bytes
         else:
-            print("No music")
             media_output = tts_binary
 
         # store in database

@@ -17,6 +17,7 @@ from proj.web.resources.stories.create_story import CreateStoryResource
 from proj.web.resources.stories.list_own_stories import ListOwnStoriesResource
 from proj.web.resources.stories.list_user_stories import ListUserStoriesResource
 from proj.web.resources.stories.play_story import PlayStoryResource
+from proj.web.resources.stories.story import StoryResource
 from proj.web.resources.user import UserResource
 
 
@@ -59,6 +60,7 @@ class WebApp:
         self.register_resource(ListUserStoriesResource)
         self.register_resource(CreateStoryResource)
         self.register_resource(PlayStoryResource)
+        self.register_resource(StoryResource)
         if self.config.get("debug") is True:
             # debug routes
             self.register_resource(DebugDatabaseResource)
