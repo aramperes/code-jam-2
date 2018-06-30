@@ -24,7 +24,7 @@ class RegisterResource(BaseResource):
         # First, let's check if the username is already taken
         # To do that, we want to check if there is already a document with that username inside it.
         # So, we want to count how many users have that username. If not 0, then someone is already taking it.
-        users = self.db.get_all("users", username, index="username")
+        users = self.db.get_all("users", username, index="username", limit=1)
         username_taken = len(users) > 0
         if username_taken:
             # There are more than 0 users with that username, so it must be taken.

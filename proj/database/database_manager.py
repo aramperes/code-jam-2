@@ -48,15 +48,19 @@ class DatabaseManager:
         doc = self.run(rethinkdb.table(table).get(key))
         return dict(doc) if doc else default
 
-    def get_all(self, table, key, index):
+    def get_all(self, table, key, index, limit=None):
         """
         Gets all documents with the given key and the specified secondary index in the given table.
         :param table the table to lookup
         :param key: the key value of the documents to find
         :param index: the secondary index to lookup against
+        :param limit: specifies a limit of documents to query
         :return an array containing the documents that match the given key
         """
-        return self.run(rethinkdb.table(table).get_all(key, index=index).coerce_to("array"))
+        if limit:
+            return self.run(rethinkdb.table(table).get_all(key, index=index).limit(limit).coerce_to("array"))
+        else:
+            return self.run(rethinkdb.table(table).get_all(key, index=index).coerce_to("array"))
 
     def try_create_database(self):
         """

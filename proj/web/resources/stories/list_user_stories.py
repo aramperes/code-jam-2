@@ -11,8 +11,7 @@ class ListUserStoriesResource(BaseResource):
     @oauth(force=False)
     def get(self, username):
         # check if the user exists
-        user_query = self.db.query("users").get_all(username, index="username").limit(1).coerce_to("array")
-        user_list = self.db.run(user_query)
+        user_list = self.db.get_all("users", username, index="username", limit=1)
         if not user_list:
             raise NotFound()
         user = user_list[0]
