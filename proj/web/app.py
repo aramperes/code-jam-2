@@ -51,18 +51,23 @@ class WebApp:
 
         self.register_resource(IndexResource)
         self.register_resource(UserResource)
+
         # Authentication resources
+        # Documentation: https://gitlab.com/DefiantSails/code-jam-2/wikis/Authentication
         self.register_resource(LoginResource)
         self.register_resource(RegisterResource)
         self.register_resource(RefreshTokenResource)
+
         # Stories
+        # Documentation: https://gitlab.com/DefiantSails/code-jam-2/wikis/Mythological-Stories-API
         self.register_resource(ListOwnStoriesResource)
         self.register_resource(ListUserStoriesResource)
         self.register_resource(CreateStoryResource)
         self.register_resource(PlayStoryResource)
         self.register_resource(StoryResource)
+
+        # Debug resources
         if self.config.get("debug") is True:
-            # debug routes
             self.register_resource(DebugDatabaseResource)
             self.register_resource(DebugConfigResource)
 
