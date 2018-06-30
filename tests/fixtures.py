@@ -18,7 +18,10 @@ class ConfigShim(Config):
                 "port": 28015,
                 "database_name": "temp_test_database"
             },
-            "debug": True
+            "debug": True,
+            "stories": {
+                "ffmpeg": os.environ.get("FFMPEG_EXEC", default="ffmpeg")
+            }
         }
 
 
