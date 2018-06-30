@@ -45,7 +45,7 @@ class DatabaseManager:
         :param default: a default value if the document doesn't exist
         :return: a dict containing the document's fields, or the default parameter if no such document exists
         """
-        doc = rethinkdb.table(table).get(key).run(self.connection)
+        doc = self.run(rethinkdb.table(table).get(key))
         return dict(doc) if doc else default
 
     def get_all(self, table, key, index):
@@ -56,7 +56,7 @@ class DatabaseManager:
         :param index: the secondary index to lookup against
         :return an array containing the documents that match the given key
         """
-        return rethinkdb.table(table).get_all(key, index=index).coerce_to("array").run(self.connection)
+        return self.run(rethinkdb.table(table).get_all(key, index=index).coerce_to("array"))
 
     def try_create_database(self):
         """
@@ -64,7 +64,7 @@ class DatabaseManager:
         If the database already exists, nothing happens.
         """
         try:
-            rethinkdb.db_create(self.database_name).run(self.connection)
+            self.run(rethinkdb.db_create(self.database_name))
             log.debug("Created database '{0}'.".format(self.database_name))
         except rethinkdb.ReqlRuntimeError:
             log.debug("Failed to create database '{0}'; already exists.".format(self.database_name))
@@ -76,7 +76,7 @@ class DatabaseManager:
         """
         with self.connect() as self.connection:
             # find the existing tables first
-            existing_tables = self.table_list().run(self.connection)
+            existing_tables = self.run(self.table_list())
             log.debug(f"Found {len(existing_tables)} table(s): {str(existing_tables)}.")
 
             for table_name, schema in SCHEMA.items():
@@ -85,7 +85,7 @@ class DatabaseManager:
                     continue
 
                 log.debug(f"Creating new table '{table_name}'.")
-                rethinkdb.table_create(table_name, primary_key=schema.primary_key).run(self.connection)
+                self.run(rethinkdb.table_create(table_name, primary_key=schema.primary_key))
 
     def query(self, table_name: str):
         """
@@ -191,9 +191,10 @@ class DatabaseManager:
                     }
 
                     # update the migrations table
-                    rethinkdb.table(migrations_table).insert(migration_data,
-                                                             conflict="replace",
-                                                             durability="soft").run(self.connection)
+                    insert_query = rethinkdb.table(migrations_table).insert(migration_data,
+                                                                            conflict="replace",
+                                                                            durability="soft")
+                    self.run(insert_query)
                 except Exception:
                     log.warning("Failed to migrate '{0}'".format(table))
                     raise
