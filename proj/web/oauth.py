@@ -71,7 +71,7 @@ def oauth(force):
             if expiration < datetime.datetime.now(expiration.tzinfo):
                 if force:
                     raise Unauthorized(
-                        description="The provided access token is expired."
+                        description="The provided access token is expired. "
                                     "Use the /auth/refresh route with a refresh token to get a new access token.")
                 else:
                     return f(self, *args, **kwargs)
