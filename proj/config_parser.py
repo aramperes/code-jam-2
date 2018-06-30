@@ -2,10 +2,10 @@ import yaml
 
 
 class Config:
-    def __init__(self, config_file):
+    def __init__(self, config_path):
         self.config = None
         # Assign config file location to class variable
-        self.config_file = config_file
+        self.config_path = config_path
 
         # Call helper funcs
         self.load_config()
@@ -20,12 +20,12 @@ class Config:
 
     def load_config(self):
         # Can also be called by itself to reload config.
-        with open(self.config_file) as config_stream:
-            self.config = yaml.safe_load(config_stream)
+        with open(self.config_path) as config_file:
+            self.config = yaml.safe_load(config_file)
 
-    def change_config_file(self, config_file, reload=True):
+    def change_config_path(self, config_path, reload=True):
         # Used to change which config the pointer points to.
-        self.config_file = config_file
+        self.config_path = config_path
 
         if reload:
             self.load_config()

@@ -94,7 +94,7 @@ class DatabaseManager:
         :return: a new query for this table
         """
         if table_name not in SCHEMA:
-            raise Exception("Table not in schema: {0}".format(table_name))
+            raise ValueError("Table not in schema: {0}".format(table_name))
         return rethinkdb.table(table_name)
 
     def table_list(self):
