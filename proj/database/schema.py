@@ -1,8 +1,8 @@
-from typing import List
+from typing import Tuple
 
 
 class TableSchema:
-    def __init__(self, keys: List, primary_key="id"):
+    def __init__(self, keys: Tuple[str, ...], primary_key="id"):
         self.primary_key = primary_key
         self.keys = keys
 
@@ -13,32 +13,42 @@ SCHEMA = {
         # For each table, there is a corresponding version to keep track of the last migration run on
         # that particular table.
         primary_key="table_name",
-        keys=[
+        keys=(
             "table_name",
             "version"
-        ]
+        )
     ),
     "users": TableSchema(
         primary_key="id",
-        keys=[
+        keys=(
             "id",
             "username",
             "password_hash"
-        ]
+        )
     ),
     "oauth_tokens": TableSchema(
         primary_key="token",
-        keys=[
+        keys=(
             "token",
             "user_id",
             "expires"
-        ]
+        )
     ),
     "oauth_refresh_tokens": TableSchema(
         primary_key="refresh_token",
-        keys=[
+        keys=(
             "refresh_token",
             "user_id"
-        ]
+        )
+    ),
+    "stories": TableSchema(
+        primary_key="id",
+        keys=(
+            "id",
+            "user_id",
+            "public",
+            "sentences",
+            "media"
+        )
     )
 }

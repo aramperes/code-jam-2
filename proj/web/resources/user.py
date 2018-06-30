@@ -10,7 +10,7 @@ class UserResource(BaseResource):
     url = "/me"
     name = "api.user.me"
 
-    @oauth
+    @oauth(force=True)
     def get(self):
         return {
             "username": self.user_data["username"],
