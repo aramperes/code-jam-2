@@ -5,6 +5,7 @@ services:
 
 variables:
   RETHINKDB_HOST: "rethinkdb"
+  FFMPEG_EXEC: "/usr/bin/ffmpeg"
 
 stages:
   - test
@@ -19,7 +20,7 @@ test:
 
     # Install python dependencies
     - apt-get update
-    - apt-get -y install build-essential libffi-dev python-dev
+    - apt-get -y install build-essential libffi-dev python-dev ffmpeg
     - pip install pipenv
     - pipenv sync --dev
 
