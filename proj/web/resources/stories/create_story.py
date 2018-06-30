@@ -131,8 +131,11 @@ class CreateStoryResource(BaseResource):
             )
             log.debug("Executing FFMPEG command: {0}".format(ff.cmd))
             # The mixed track is output using the subprocess's STDOUT, piped to the mixed_bytes var
-            mixed_bytes, stderr = ff.run(input_data=tts_binary, stdout=subprocess.PIPE)
-            media_output = mixed_bytes
+            media_output, stderr = ff.run(input_data=tts_binary, stdout=subprocess.PIPE)
+            if stderr:
+                log.debug("FFMPEG STDERR: %s", str(stderr.read()))
+            else:
+                log.debug("No FFMPEG STDERR")
 
         # store in database
         story_insert_doc = {
