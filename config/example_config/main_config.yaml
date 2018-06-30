@@ -17,3 +17,6 @@ user:
   allow_multiple_accounts_from_ip: true    #Allow multiple registrations from a single IP?
 
 debug: true
+
+stories:
+  ffmpeg: "/path/to/ffmpeg/executable"

@@ -13,6 +13,10 @@ from proj.web.resources.auth.register import RegisterResource
 from proj.web.resources.debug.config import DebugConfigResource
 from proj.web.resources.debug.database import DebugDatabaseResource
 from proj.web.resources.index import IndexResource
+from proj.web.resources.stories.create_story import CreateStoryResource
+from proj.web.resources.stories.list_own_stories import ListOwnStoriesResource
+from proj.web.resources.stories.list_user_stories import ListUserStoriesResource
+from proj.web.resources.stories.play_story import PlayStoryResource
 from proj.web.resources.user import UserResource
 
 
@@ -50,6 +54,11 @@ class WebApp:
         self.register_resource(LoginResource)
         self.register_resource(RegisterResource)
         self.register_resource(RefreshTokenResource)
+        # Stories
+        self.register_resource(ListOwnStoriesResource)
+        self.register_resource(ListUserStoriesResource)
+        self.register_resource(CreateStoryResource)
+        self.register_resource(PlayStoryResource)
         if self.config.get("debug") is True:
             # debug routes
             self.register_resource(DebugDatabaseResource)

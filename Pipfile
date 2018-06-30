@@ -10,6 +10,9 @@ rethinkdb = "==2.3.0.post6"
 waitress = "==1.1.0"
 Flask-RESTful = "==0.3.6"
 bcrypt = "*"
+gtts = "*"
+markovify = "*"
+ffmpy = "*"
 
 [dev-packages]
 "flake8" = "*"
