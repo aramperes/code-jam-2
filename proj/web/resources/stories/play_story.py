@@ -14,7 +14,7 @@ class PlayStoryResource(BaseResource):
     def get(self, story_id):
         # Find the story in the database
         try:
-            story_query = self.db.query("stories").get(story_id).pluck("user_id", "public", "media")
+            story_query = self.db.query("stories").get(story_id).pluck("user_id", "public", "media", "media_type")
             story = self.db.run(story_query)
         except ReqlNonExistenceError:
             raise NotFound()
@@ -23,9 +23,7 @@ class PlayStoryResource(BaseResource):
         if not story["public"] and not is_own:
             raise Unauthorized("The story you requested has been marked as private by its author.")
 
-        media = story["media"]
-
-        response = make_response(media)
-        response.headers["Content-Type"] = "audio/mpeg"
+        response = make_response(story["media"])
+        response.headers["Content-Type"] = story["media_type"]
 
         return response

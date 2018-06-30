@@ -48,7 +48,8 @@ SCHEMA = {
             "user_id",
             "public",
             "sentences",
-            "media"
+            "media",
+            "media_type"
         )
     )
 }
