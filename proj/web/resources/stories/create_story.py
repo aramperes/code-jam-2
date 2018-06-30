@@ -1,4 +1,5 @@
 import io
+import logging
 import os
 import random
 import subprocess
@@ -13,6 +14,8 @@ from werkzeug.exceptions import ServiceUnavailable
 from proj.web.base_resource import BaseResource
 from proj.web.oauth import oauth
 
+log = logging.getLogger(__name__)
+
 
 class CreateStoryResource(BaseResource):
     name = "api.stories.create"
@@ -23,10 +26,13 @@ class CreateStoryResource(BaseResource):
         data = request.json or {}
         # optional parameter: public (true/false), default true
         # optional parameter: music (true/false), default true
+        # optional parameter: video (true/false), default true
 
         public = bool(data.get("public", True))
         music = bool(data.get("music", True))
+        video = bool(data.get("video", True))
 
+        # Generate some sentences from a corpus, using markov chains (woo, how original)
         corpus_path = os.path.join(".", "assets", "texts", "texts.txt")
         if not os.path.exists(corpus_path):
             raise ServiceUnavailable(description="Corpus is unavailable.")
@@ -55,44 +61,86 @@ class CreateStoryResource(BaseResource):
             # Read the buffer
             tts_binary = tts_buffer.read()
 
-        if music:
+        if not music and not video:
+            # no FFMPEG filtering necessary
+            media_output = tts_binary
+        else:
+            # Music parameters
             music_path = os.path.join(".", "assets", "music", "track.mp3")
             music_time_start = random.randrange(0, 1200)  # seconds
+            music_volume = 0.2
 
-            # The syntax may look intimidating at first, but simply this applies 3 filters to the 2 audio tracks:
-            # 1. First, the volume of the music track is reduced to 10%, while the TTS track is left at 100%
-            # 2. Then, the audio of the music track is trimmed to start at a certain time
-            # 3. Finally, the two audio tracks are mixed together to produce one track
-            ffmpeg_filter = "-filter_complex " \
-                            "[0:a]volume=1[a0];[1:a]volume=0.1[a1];" \
-                            "[a1]atrim=start={music_start}[a1];" \
-                            "[a0][a1]amix=inputs=2:duration=shortest:dropout_transition=3[a]" \
-                            " -map \"[a]\" -f mp3".format(music_start=music_time_start)
-
-            # The first track (TTS) is piped from the stream
-            # The second track (music) is read from file by FFMPEG
-            ff = FFmpeg(
-                executable=self.web_app.config.get("stories", "ffmpeg"),
-                inputs={
+            # FFMPEG filters
+            if music and video:
+                # Mix music, TTS, and video
+                # 1. First, the volume of the music track is reduced, while the TTS track is left at 100%
+                # 2. Then, the audio of the music track is trimmed to start at a certain time
+                # 3. Finally, the two audio tracks are mixed together to produce one track
+                # 4. Duplicate the mixed audio track into two labels
+                # 5. Generate a video with the samples waves from the first audio label
+                # 6. Export video and audio to pipe in webm format
+                ffmpeg_filter = "-filter_complex " \
+                                "[0:a]volume=1[a0];[1:a]volume={music_volume}[a1];" \
+                                "[a1]atrim=start={music_start}[a1];" \
+                                "[a0][a1]amix=inputs=2:duration=shortest:dropout_transition=3[a];" \
+                                "[a]asplit[outa1][outa2];" \
+                                "[outa1]showwaves=s=1280x202:mode=line[sw]" \
+                                " -map \"[sw]\" -map \"[outa2]\" -c:v libvpx -speed 8 -c:a libvorbis -f webm" \
+                    .format(music_start=music_time_start,
+                            music_volume=music_volume)
+                ff_inputs = {
                     "pipe:0": None,
                     music_path: None
-                },
+                }
+
+            elif music:
+                # Mix music and TTS
+                # 1. First, the volume of the music track is reduced, while the TTS track is left at 100%
+                # 2. Then, the audio of the music track is trimmed to start at a certain time
+                # 3. Finally, the two audio tracks are mixed together to produce one track
+                # 4. Export to pipe in MP3
+                ffmpeg_filter = "-filter_complex " \
+                                "[0:a]volume=1[a0];[1:a]volume={music_volume}[a1];" \
+                                "[a1]atrim=start={music_start}[a1];" \
+                                "[a0][a1]amix=inputs=2:duration=shortest:dropout_transition=3[a]" \
+                                " -map \"[a]\" -f mp3".format(music_start=music_time_start,
+                                                              music_volume=music_volume)
+                ff_inputs = {
+                    "pipe:0": None,
+                    music_path: None
+                }
+            else:
+                # Mix video and TTS
+                # 1. The TTS audio track is duplicated into two labels
+                # 2. Generate a video with the samples waves from the first audio label
+                # 3. Export video and audio to pipe in webm format
+                ffmpeg_filter = "-filter_complex " \
+                                "[0:a]asplit[outa1][outa2];" \
+                                "[outa1]showwaves=s=1280x202:mode=line[sw]" \
+                                " -map \"[sw]\" -map \"[outa2]\" -c:v libvpx -speed 8 -c:a libvorbis -f webm"
+                ff_inputs = {
+                    "pipe:0": None
+                }
+
+            ff = FFmpeg(
+                executable=self.web_app.config.get("stories", "ffmpeg"),
+                inputs=ff_inputs,
                 outputs={
                     "pipe:1": ffmpeg_filter
                 }
             )
+            log.debug("Executing FFMPEG command: {0}".format(ff.cmd))
             # The mixed track is output using the subprocess's STDOUT, piped to the mixed_bytes var
             mixed_bytes, stderr = ff.run(input_data=tts_binary, stdout=subprocess.PIPE)
             media_output = mixed_bytes
-        else:
-            media_output = tts_binary
 
         # store in database
         story_insert_doc = {
             "public": public,
             "user_id": self.user_data["id"],
             "sentences": sentences,
-            "media": rethinkdb.binary(media_output)
+            "media": rethinkdb.binary(media_output),
+            "media_type": "video/webm" if video else "audio/mpeg"
         }
         insert_query = self.db.query("stories").insert(story_insert_doc)
         story_id = self.db.run(insert_query)["generated_keys"][0]

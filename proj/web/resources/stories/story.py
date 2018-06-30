@@ -12,7 +12,7 @@ class StoryResource(BaseResource):
     @oauth(force=False)
     def get(self, story_id):
         try:
-            story_query = self.db.query("stories").get(story_id).pluck("user_id", "public", "sentences")
+            story_query = self.db.query("stories").get(story_id).pluck("user_id", "public", "sentences", "media_type")
             story = self.db.run(story_query)
         except ReqlNonExistenceError:
             raise NotFound()
@@ -28,7 +28,8 @@ class StoryResource(BaseResource):
             "sentences": story["sentences"],
             "author": author,
             "url": "/story/{0}".format(story_id),
-            "media": "/story/{0}/play".format(story_id)
+            "media": "/story/{0}/play".format(story_id),
+            "media_type": story["media_type"]
         }
 
     @oauth(force=True)
