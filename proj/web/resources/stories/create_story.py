@@ -85,7 +85,8 @@ class CreateStoryResource(BaseResource):
                                 "[a0][a1]amix=inputs=2:duration=shortest:dropout_transition=3[a];" \
                                 "[a]asplit[outa1][outa2];" \
                                 "[outa1]showwaves=s=1280x202:mode=line[sw]" \
-                                " -map \"[sw]\" -map \"[outa2]\" -c:v libvpx -speed 8 -c:a libvorbis -f webm" \
+                                " -map \"[sw]\" -map \"[outa2]\" -c:v libvpx -auto-alt-ref 0 -speed 8 " \
+                                "-c:a libvorbis -f webm" \
                     .format(music_start=music_time_start,
                             music_volume=music_volume)
                 ff_inputs = {
@@ -117,7 +118,8 @@ class CreateStoryResource(BaseResource):
                 ffmpeg_filter = "-filter_complex " \
                                 "[0:a]asplit[outa1][outa2];" \
                                 "[outa1]showwaves=s=1280x202:mode=line[sw]" \
-                                " -map \"[sw]\" -map \"[outa2]\" -c:v libvpx -speed 8 -c:a libvorbis -f webm"
+                                " -map \"[sw]\" -map \"[outa2]\" -c:v libvpx -auto-alt-ref 0 -speed 8 " \
+                                "-c:a libvorbis -f webm"
                 ff_inputs = {
                     "pipe:0": None
                 }
