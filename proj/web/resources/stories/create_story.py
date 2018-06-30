@@ -1,5 +1,6 @@
 import io
 import os
+import random
 import subprocess
 
 import markovify
@@ -56,8 +57,7 @@ class CreateStoryResource(BaseResource):
 
         if music:
             music_path = os.path.join(".", "assets", "music", "track.mp3")
-            # todo: randomize music start
-            music_time_start = 100  # seconds
+            music_time_start = random.randrange(0, 1200)  # seconds
 
             # The syntax may look intimidating at first, but simply this applies 3 filters to the 2 audio tracks:
             # 1. First, the volume of the music track is reduced to 10%, while the TTS track is left at 100%
