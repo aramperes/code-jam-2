@@ -23,7 +23,7 @@ class CreateCharacterResource(BaseResource):
 
     @oauth(force=True)
     def post(self):
-        max_points = self.web_app.config.get("game", "max_stat_points")
+        max_points = self.web_app.config.get("game", "max_stat_points", default=20)
         data = request.json or {}
 
         if "name" not in data:
@@ -44,11 +44,11 @@ class CreateCharacterResource(BaseResource):
         elif "special" not in data:
             raise BadRequest(description="Your character requires a special selection!")
 
-        elif data["special"] not in ["lightning", "wither", "gamble"]:
+        elif data["special"] not in ("lightning", "wither", "gamble"):
             raise BadRequest(description="Please select lightning, wither, or gamble as your special.")
 
-        elif int(data["strength"] + data["dexterity"] + data["health"]) > max_points:
-            raise BadRequest(description="Point value of stats exceeds maximum of {}".format(str(max_points)))
+        elif (int(data["strength"]) + int(data["dexterity"]) + int(data["health"])) > max_points:
+            raise BadRequest(description="Point value of stats exceeds maximum of {0}".format(max_points))
 
         # All the checks succeeded, so let's set up a document.
         document = {

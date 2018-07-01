@@ -35,9 +35,9 @@ class PlayGameResource(BaseResource):
             raise BadRequest(description="Game not found.")
 
         if game["won"]:
-            raise Unauthorized(description="You cannot play a game that has already been won.")
+            raise Unauthorized(description="You cannot play a game that has already been concluded.")
 
-        if self.user_data["username"] not in [game["defender_username"], game["challenger_username"]]:
+        if self.user_data["username"] not in (game["defender_username"], game["challenger_username"]):
             raise Unauthorized(description="You are not a player in this game.")
 
         try:
@@ -91,7 +91,7 @@ class PlayGameResource(BaseResource):
                     if attacker["dexterity"] + randint(-5, 5) > victim["dexterity"] + randint(-5, 5):
                         win = True
 
-                elif data["move"].lower() in ["lightning bolt", "wither", "gamble"]:
+                elif data["move"].lower() in ("lightning bolt", "wither", "gamble"):
                     valid = True
                     special = True
 

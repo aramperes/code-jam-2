@@ -29,18 +29,22 @@ class ChallengeResource(BaseResource):
         if "defender" not in data or "challenge_config" not in data:
             raise BadRequest(description="You must provide all required fields.")
 
-        elif "max_turns" not in data["challenge_config"] or "character" not in data["challenge_config"]:
+        if "max_turns" not in data["challenge_config"] or "character" not in data["challenge_config"]:
             raise BadRequest(description="You must provide all required fields in challenge config.")
 
-        defender = self.db.get_all("users", data['defender'], index="username")
+        if str(data["defender"]) == self.user_data["username"]:
+            raise BadRequest(description="You cannot challenge yourself.")
+
+        defender = self.db.get_all("users", data['defender'], index="username", limit=1)
         if not defender:  # Does the defender exist in the database?
             raise BadRequest(description="Defender does not exist in database.")
 
-        character = self.db.get_all("characters", data['challenge_config']['character'], index="name")
+        character = self.db.get_all("characters", data['challenge_config']['character'], index="name", limit=1)
         if not character:  # Does the character exist in the database?
             raise BadRequest(description="Character does not exist.")
+        character = character[0]
 
-        if not self.db.run(character)["owner"] == self.user_data["username"]:
+        if character["owner"] != self.user_data["username"]:
             raise Unauthorized(description="Character does not belong to you.")
 
         # All the checks passed, let's set up a document to insert into the database.
@@ -55,6 +59,6 @@ class ChallengeResource(BaseResource):
         # We have to create a query to the table we want to insert a document into
         insert_query = self.db.query("challenges").insert(challenge_data)
         # Run the query in the database
-        self.db.run(insert_query)
+        result = self.db.run(insert_query)
 
-        return {'success': True}
+        return {"success": True, "challenge_id": result["generated_keys"][0]}
