@@ -14,7 +14,7 @@ from proj.web.resources.debug.config import DebugConfigResource
 from proj.web.resources.debug.database import DebugDatabaseResource
 from proj.web.resources.game.challenge import ChallengeResource
 from proj.web.resources.game.create_character import CreateCharacterResource
-from proj.web.resources.game.decide_challenge import DecideChallengeResource
+from proj.web.resources.game.decide_challenge import ChallengeDecisionResource
 from proj.web.resources.game.play_game import PlayGameResource
 from proj.web.resources.index import IndexResource
 from proj.web.resources.stories.create_story import CreateStoryResource
@@ -75,7 +75,7 @@ class WebApp:
 
         # Game Resources
         self.register_resource(ChallengeResource)
-        self.register_resource(DecideChallengeResource)
+        self.register_resource(ChallengeDecisionResource)
         self.register_resource(CreateCharacterResource)
         self.register_resource(PlayGameResource)
 

@@ -30,13 +30,13 @@ class PlayGameResource(BaseResource):
         game = self.db.get_doc("games", data["id"])
 
         if not game:
-            return BadRequest(description="Game not found.")
+            raise BadRequest(description="Game not found.")
 
         if game["won"]:
-            return Unauthorized(description="You cannot play a game that has already been won.")
+            raise Unauthorized(description="You cannot play a game that has already been won.")
 
         if self.user_data["username"] not in [game["defender_username"], game["challenger_username"]]:
-            return Unauthorized(description="You are not a player in this game.")
+            raise Unauthorized(description="You are not a player in this game.")
 
         try:
             if self.user_data["username"] == game["defender_username"]:
@@ -215,14 +215,14 @@ class PlayGameResource(BaseResource):
 
 
                     return {
-                        "success": True
+                        "success": True,
                         "data": self.db.get_doc("games", data['id'])
                     }
 
-            return BadRequest(description="Please enter a valid move.")
+            raise BadRequest(description="Please enter a valid move.")
 
         except ValueError:
-            return BadRequest(description="A move is required!")
+            raise BadRequest(description="A move is required!")
 
     @oauth
     def get(self):
@@ -232,7 +232,7 @@ class PlayGameResource(BaseResource):
             game = self.db.get_doc("games", data["id"])
 
             if not game:
-                return BadRequest(description="Game not found.")
+                raise BadRequest(description="Game not found.")
 
             return {
                 "success": True,
@@ -240,5 +240,5 @@ class PlayGameResource(BaseResource):
             }
 
         except ValueError:
-            return BadRequest(description="Please enter an ID.")
+            raise BadRequest(description="Please enter an ID.")
 

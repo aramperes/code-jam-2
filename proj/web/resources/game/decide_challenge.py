@@ -31,21 +31,21 @@ class ChallengeDecisionResource(BaseResource):
 
         try:
             if self.db.get_doc("challenges", data['id'])["defender_username"] != self.user_data["username"]:
-                return BadRequest(description="This challenge is not directed towards you!")
+                raise BadRequest(description="This challenge is not directed towards you!")
         except ValueError:
-            return BadRequest(description="This challenge does not exist!")
+            raise BadRequest(description="This challenge does not exist!")
 
         try:
             if not bool(data["accept"]):
                 self.db.run(self.db.query("challenges").get(data["id"]).delete())
                 return {'success': True}
         except ValueError:
-            return BadRequest(description="accept must be a boolean")
+            raise BadRequest(description="accept must be a boolean")
 
         if active_game:
             for game_entry in active_game:
                 if not game_entry['won']:
-                    return Unauthorized(description="A game is already in progress!")
+                    raise Unauthorized(description="A game is already in progress!")
 
         try:
             # All the checks succeeded and they accepted the challenge, so let's set up a document.
@@ -70,12 +70,12 @@ class ChallengeDecisionResource(BaseResource):
                     "special": str(char_defender["special"])
                 },
                 "turn_number": 1,
-                "max_turns": int(info["max_turns"])
-                "turn": str(self.user_data["username"])
+                "max_turns": int(info["max_turns"]),
+                "turn": str(self.user_data["username"]),
                 "won": None
             }
         except ValueError:
-            BadRequest(description="Your character must exist!")
+            raise BadRequest(description="Your character must exist!")
 
         # Everything checks out, so let's add their character to the database.
         # We have to create a query to the table we want to insert a document into

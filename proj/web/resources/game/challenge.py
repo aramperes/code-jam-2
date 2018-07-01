@@ -26,22 +26,22 @@ class ChallengeResource(BaseResource):
 
         # Check to make sure all data is correct and workable.
         if "defender" not in data or "challenge_config" not in data:
-            return BadRequest(description="You must provide all required fields.")
+            raise BadRequest(description="You must provide all required fields.")
 
         elif "max_turns" not in data["challenge_config"] or "character" not in data["challenge_config"]:
-            return BadRequest(description="You must provide all required fields in challenge config.")
+            raise BadRequest(description="You must provide all required fields in challenge config.")
 
 
         defender = self.db.get_all("users", data['defender'], index="username")
         if not defender:  # Does the defender exist in the database?
-            return BadRequest(description="Defender does not exist in database.")
+            raise BadRequest(description="Defender does not exist in database.")
 
         character = self.db.get_all("characters", data['challenge_config']['character'], index="name")
         if not character:  # Does the character exist in the database?
-            return BadRequest(description="Character does not exist.")
+            raise BadRequest(description="Character does not exist.")
 
         if not self.db.run(character)["owner"] == self.user_data["username"]:
-            return Unauthorized(description="Character does not belong to you.")
+            raise Unauthorized(description="Character does not belong to you.")
 
         # All the checks passed, let's set up a document to insert into the database.
         challenge_data = {

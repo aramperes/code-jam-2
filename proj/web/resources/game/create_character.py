@@ -25,32 +25,32 @@ class CreateCharacterResource(BaseResource):
 
     @oauth
     def post(self):
-        max_points = main_config.get("game", "max_stat_points")
+        max_points = self.web_app.config.get("game", "max_stat_points")
         data = request.json or {}
 
         if "name" not in data:
-            return BadRequest(description="Your character requires a name!")
+            raise BadRequest(description="Your character requires a name!")
 
         elif "description" not in data:
-            return BadRequest(description="Your character requires a description!")
+            raise BadRequest(description="Your character requires a description!")
 
         elif "strength" not in data:
-            return BadRequest(description="Your character requires a strength stat!")
+            raise BadRequest(description="Your character requires a strength stat!")
 
         elif "dexterity" not in data:
-            return BadRequest(description="Your character requires a dexterity stat!")
+            raise BadRequest(description="Your character requires a dexterity stat!")
 
         elif "health" not in data:
-            return BadRequest(description="Your character requires a health stat!")
+            raise BadRequest(description="Your character requires a health stat!")
 
         elif "special" not in data:
-            return BadRequest(description="Your character requires a special selection!")
+            raise BadRequest(description="Your character requires a special selection!")
 
-        elif data[special] not in ["lightning", "wither", "gamble"]:
-            return BadRequest(description="Please select lightning, wither, or gamble as your special.")
+        elif data["special"] not in ["lightning", "wither", "gamble"]:
+            raise BadRequest(description="Please select lightning, wither, or gamble as your special.")
 
         elif int(data["strength"] + data["dexterity"] + data["health"]) > max_points:
-            return BadRequest(description="Point value of stats exceeds maximum of {}".format(str(max_points)))
+            raise BadRequest(description="Point value of stats exceeds maximum of {}".format(str(max_points)))
 
         # All the checks succeeded, so let's set up a document.
         document = {

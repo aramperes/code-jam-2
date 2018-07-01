@@ -1,6 +1,3 @@
-from flask import request
-from werkzeug.exceptions import BadRequest, Unauthorized
-
 from proj.web.base_resource import BaseResource
 from proj.web.oauth import oauth
 
@@ -29,7 +26,6 @@ class UserListResource(BaseResource):
                 }
                 continue
 
-
             secondary_query = self.db.get_all("games", user, index="defender_username")
 
             if main_query["defender_username"]:
@@ -39,9 +35,8 @@ class UserListResource(BaseResource):
                 }
 
             final_data[user] = {
-                "current_game": "none"
+                "current_game": "none",
                 "current_role": "none"
             }
-
 
         return final_data
