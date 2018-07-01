@@ -31,7 +31,7 @@ class CreateStoryResource(BaseResource):
             count = self.db.run(stories_query)
             if count >= quota:
                 raise Forbidden(description="You have exceeded your quota of {0} stories. "
-                                            "Use the 'DELETE /story/<story_id> to clean up your stories.'"
+                                            "Use the 'DELETE /story/<story_id>' to clean up your stories."
                                 .format(quota))
 
         data = request.json or {}
@@ -121,6 +121,7 @@ class CreateStoryResource(BaseResource):
                     "pipe:0": None,
                     music_path: None
                 }
+
             else:
                 # Mix video and TTS
                 # 1. The TTS audio track is duplicated into two labels
@@ -135,6 +136,7 @@ class CreateStoryResource(BaseResource):
                     "pipe:0": None
                 }
 
+            # Launch ffmpeg
             ff = FFmpeg(
                 executable=self.web_app.config.get("stories", "ffmpeg"),
                 inputs=ff_inputs,
