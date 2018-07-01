@@ -1,3 +1,4 @@
+import glob
 import io
 import logging
 import os
@@ -9,7 +10,7 @@ import rethinkdb
 from ffmpy import FFmpeg
 from flask import request
 from gtts import gTTS
-from werkzeug.exceptions import Forbidden, ServiceUnavailable
+from werkzeug.exceptions import BadRequest, Forbidden, ServiceUnavailable
 
 from proj.web.base_resource import BaseResource
 from proj.web.oauth import oauth
@@ -38,21 +39,40 @@ class CreateStoryResource(BaseResource):
         # optional parameter: public (true/false), default true
         # optional parameter: music (true/false), default true
         # optional parameter: video (true/false), default true
+        # optional parameter: corpus (str), default "mixed"
 
         public = bool(data.get("public", True))
         music = bool(data.get("music", True))
         video = bool(data.get("video", True))
+        corpus_param = str(data.get("corpus", "mixed"))
 
-        # Generate some sentences from a corpus, using markov chains (woo, how original)
-        corpus_path = os.path.join(".", "assets", "texts", "texts.txt")
-        if not os.path.exists(corpus_path):
+        # all available corpus
+        corpus_dir = os.path.join(".", "assets", "texts")
+        corpus_glob = os.path.join(corpus_dir, "*.txt")
+        corpus_names = [os.path.splitext(os.path.basename(path))[0] for path in glob.glob(corpus_glob)]
+
+        if not corpus_names:
             raise ServiceUnavailable(description="Corpus is unavailable.")
 
-        with open(corpus_path) as corpus_file:
-            corpus = corpus_file.read()
+        if corpus_param == "mixed":
+            # Read each corpus individually, and combine them into one markov chain
+            models = []
+            for corpus_path in corpus_names:
+                with open(os.path.join(corpus_dir, "{0}.txt".format(corpus_path)), encoding="utf-8") as corpus_file:
+                    corpus_text = corpus_file.read()
+                models.append(markovify.Text(corpus_text))
+            model = markovify.combine(models)
+        elif corpus_param in corpus_names:
+            # use that corpus only
+            with open(os.path.join(corpus_dir, "{0}.txt".format(corpus_param)), encoding="utf-8") as corpus_file:
+                corpus_text = corpus_file.read()
+            model = markovify.Text(corpus_text)
+        else:
+            raise BadRequest(
+                description="Unknown corpus '{0}'. Available corpus: {1}".format(corpus_param,
+                                                                                 ", ".join(corpus_names)))
 
-        model = markovify.Text(corpus)
-
+        # Generate some sentences from a corpus, using markov chains (woo, how original)
         sentences = []
         for i in range(10):
             if i is 0:
