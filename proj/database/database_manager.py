@@ -117,7 +117,7 @@ class DatabaseManager:
         """
         if not self.connection.is_open():
             with self.connect() as self.connection:
-                return self.connection.run(query)
+                return query.run(self.connection)
         else:
             return query.run(self.connection)
 
