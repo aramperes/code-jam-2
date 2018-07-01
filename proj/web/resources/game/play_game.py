@@ -27,13 +27,16 @@ class PlayGameResource(BaseResource):
     @oauth
     def post(self):
         data = request.json or {}
-        game = self.db.run(self.db.query("games").get(data["id"]))
+        game = self.db.get_doc("games", data["id"])
 
         if not game:
             return BadRequest(description="Game not found.")
 
         if game["won"]:
             return Unauthorized(description="You cannot play a game that has already been won.")
+
+        if self.user_data["username"] not in [game["defender_username"], game["challenger_username"]]:
+            return Unauthorized(description="You are not a player in this game.")
 
         try:
             if self.user_data["username"] == game["defender_username"]:
@@ -47,7 +50,7 @@ class PlayGameResource(BaseResource):
 
                     return {
                         "success": True
-                        "game_data": self.db.run(self.db.query("games").get(data["id"]))
+                        "game_data": self.db.get_doc("games", data["id"])
                     }
 
             else:
@@ -61,7 +64,7 @@ class PlayGameResource(BaseResource):
 
                     return {
                         "success": True
-                        "game_data": self.db.run(self.db.query("games").get(data["id"]))
+                        "game_data": self.db.get_doc("games", data["id"])
                     }
 
             win = False
@@ -197,7 +200,7 @@ class PlayGameResource(BaseResource):
                     self.db.run(self.db.query("games").get(data["id"]).update("turn_number": game["turn_number"] += 1))
 
                     # Our old DB document may be out of date now so let's get a new copy
-                    health_check = self.db.run(self.db.query("games").get(data["id"]))
+                    health_check = self.db.get_doc("games", data["id"])
 
                     if health_check["defender_stats"]["health"] <= 0:
                         self.db.run(self.db.query("games").get(data["id"]).update("won": "challenger"))
@@ -213,7 +216,7 @@ class PlayGameResource(BaseResource):
 
                     return {
                         "success": True
-                        "data": self.db.run(self.db.query("games").get(data["id"]))
+                        "data": self.db.get_doc("games", data['id'])
                     }
 
             return BadRequest(description="Please enter a valid move.")
@@ -226,7 +229,7 @@ class PlayGameResource(BaseResource):
 
         try:
             data = request.json or {}
-            game = self.db.run(self.db.query("games").get(data["id"]))
+            game = self.db.get_doc("games", data["id"])
 
             if not game:
                 return BadRequest(description="Game not found.")

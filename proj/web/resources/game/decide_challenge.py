@@ -1,3 +1,4 @@
+import rethinkdb
 from flask import request
 from werkzeug.exceptions import BadRequest, Unauthorized
 
@@ -29,7 +30,7 @@ class ChallengeDecisionResource(BaseResource):
         ).coerce_to("array")
 
         try:
-            if self.db.run(self.db.query("challenges").get(data["id"]))["defender_username"] != self.user_data["username"]:
+            if self.db.get_doc("challenges", data['id'])["defender_username"] != self.user_data["username"]:
                 return BadRequest(description="This challenge is not directed towards you!")
         except ValueError:
             return BadRequest(description="This challenge does not exist!")
@@ -48,9 +49,9 @@ class ChallengeDecisionResource(BaseResource):
 
         try:
             # All the checks succeeded and they accepted the challenge, so let's set up a document.
-            info = self.db.run(self.db.query("challenges").get(data["id"]))
-            char_challenger = self.db.run(self.db.query("characters").get(info["challenger_character"]))
-            char_defender = self.db.run(self.db.query("characters").get(data["character"]))
+            info = self.db.get_doc("challenges", data['id'])
+            char_challenger = self.db.get_doc("challenges", info['challenger_character'])
+            char_defender = self.db.get_doc("characters", data['character'])
             document = {
                 "challenger_username": str(info["challenger_username"]),
                 "challenger_character": str(info["challenger_character"]),
