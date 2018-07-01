@@ -1,42 +1,46 @@
 from proj.web.base_resource import BaseResource
-from proj.web.oauth import oauth
 
 
 class UserListResource(BaseResource):
     """
     Gets information about all users.
-    This route requires OAuth2 authentication.
     """
-    url = "/user/list"
+    url = "/users"
     name = "api.user.list"
 
-    @oauth
     def get(self):
-        final_data = {}
+        final_data = []
         user_query = self.db.query('users').pluck('username').coerce_to('array')
 
         for user in self.db.run(user_query):
+            user_data = {
+                "username": user["username"],
+                "current_game": None,
+                "current_role": None
+            }
 
-            main_query = self.db.get_all("games", user, index="challenger_username")
-
-            if main_query["challenger_username"]:
-                final_data[user] = {
-                    "current_game": main_query["id"],
-                    "current_role": "challenger"
-                }
+            main_query = self.db.run(
+                self.db.query("games").get_all(user["username"], index="challenger_username").filter({
+                    "won": None
+                }).coerce_to("array")
+            )
+            if main_query:
+                user_data["current_game"] = main_query[0]["id"]
+                user_data["current_role"] = "challenger"
+                final_data.append(user_data)
                 continue
 
-            secondary_query = self.db.get_all("games", user, index="defender_username")
+            secondary_query = self.db.run(
+                self.db.query("games").get_all(user["username"], index="defender_username").filter({
+                    "won": None
+                }).coerce_to("array")
+            )
+            if secondary_query:
+                user_data["current_game"] = secondary_query[0]["id"]
+                user_data["current_role"] = "defender"
+                final_data.append(user_data)
+                continue
 
-            if main_query["defender_username"]:
-                final_data[user] = {
-                    "current_game": main_query["id"],
-                    "current_role": "defender"
-                }
-
-            final_data[user] = {
-                "current_game": "none",
-                "current_role": "none"
-            }
+            final_data.append(user_data)
 
         return final_data

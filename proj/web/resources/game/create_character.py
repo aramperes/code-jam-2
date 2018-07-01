@@ -1,6 +1,5 @@
-import rethinkdb
 from flask import request
-from werkzeug.exceptions import BadRequest, Unauthorized
+from werkzeug.exceptions import BadRequest
 
 from proj.web.base_resource import BaseResource
 from proj.web.oauth import oauth
@@ -22,8 +21,7 @@ class CreateCharacterResource(BaseResource):
     url = "/game/create_character"
     name = "api.game.create_character"
 
-
-    @oauth
+    @oauth(force=True)
     def post(self):
         max_points = self.web_app.config.get("game", "max_stat_points")
         data = request.json or {}

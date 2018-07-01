@@ -5,6 +5,7 @@ from werkzeug.exceptions import BadRequest, Unauthorized
 from proj.web.base_resource import BaseResource
 from proj.web.oauth import oauth
 
+
 class ChallengeDecisionResource(BaseResource):
     """
     Used to challenge another user to a game.
@@ -20,12 +21,12 @@ class ChallengeDecisionResource(BaseResource):
     url = "/game/challenge/decide"
     name = "api.game.challenge.decide"
 
-    @oauth
+    @oauth(force=True)
     def post(self):
-        
+
         data = request.json or {}
         active_game = self.db.query("games").filter(
-            (rethinkdb.row["defender_username"] == self.user_data['username']) | 
+            (rethinkdb.row["defender_username"] == self.user_data['username']) |
             (rethinkdb.row["challenger_username"] == self.user_data['username'])
         ).coerce_to("array")
 

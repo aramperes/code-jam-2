@@ -77,6 +77,12 @@ def test_use_auth(client: client):
 
 
 @pytest.mark.dependency(depends=["test_login"])
+def test_user_list(client: client):
+    response = client.get("/users")
+    assert_json_status(response, OK_STATUS)
+
+
+@pytest.mark.dependency(depends=["test_login"])
 def test_create_story(client: client):
     # create story without auth
     response = client.post("/story")

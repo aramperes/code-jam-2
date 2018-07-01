@@ -4,6 +4,7 @@ from werkzeug.exceptions import BadRequest, Unauthorized
 from proj.web.base_resource import BaseResource
 from proj.web.oauth import oauth
 
+
 class ChallengeResource(BaseResource):
     """
     Used to challenge another user to a game.
@@ -20,7 +21,7 @@ class ChallengeResource(BaseResource):
     url = "/game/challenge"
     name = "api.game.challenge"
 
-    @oauth
+    @oauth(force=True)
     def post(self):
         data = request.json or {}
 
@@ -30,7 +31,6 @@ class ChallengeResource(BaseResource):
 
         elif "max_turns" not in data["challenge_config"] or "character" not in data["challenge_config"]:
             raise BadRequest(description="You must provide all required fields in challenge config.")
-
 
         defender = self.db.get_all("users", data['defender'], index="username")
         if not defender:  # Does the defender exist in the database?
@@ -45,11 +45,11 @@ class ChallengeResource(BaseResource):
 
         # All the checks passed, let's set up a document to insert into the database.
         challenge_data = {
-                "challenger_username": str(self.user_data["username"]),
-                "defender_username": str(data["defender"]),
-                "challenger_character": str(data['challenge_config']["character"]),
-                "max_turns": str(data['challenge_config']["max_turns"])
-            }
+            "challenger_username": str(self.user_data["username"]),
+            "defender_username": str(data["defender"]),
+            "challenger_character": str(data['challenge_config']["character"]),
+            "max_turns": str(data['challenge_config']["max_turns"])
+        }
 
         # Everything checks out, so let's add their challenge to the database.
         # We have to create a query to the table we want to insert a document into

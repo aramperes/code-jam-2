@@ -24,6 +24,7 @@ from proj.web.resources.stories.list_user_stories import ListUserStoriesResource
 from proj.web.resources.stories.play_story import PlayStoryResource
 from proj.web.resources.stories.story import StoryResource
 from proj.web.resources.user import UserResource
+from proj.web.resources.user_list import UserListResource
 
 
 class WebApp:
@@ -57,6 +58,7 @@ class WebApp:
 
         self.register_resource(IndexResource)
         self.register_resource(UserResource)
+        self.register_resource(UserListResource)
 
         # Authentication resources
         # Documentation: https://gitlab.com/DefiantSails/code-jam-2/wikis/Authentication
