@@ -32,11 +32,11 @@ class ChallengeResource(BaseResource):
             return BadRequest(description="You must provide all required fields in challenge config.")
 
 
-        defender = self.db.get_all("users", data['defender'], "username")
+        defender = self.db.get_all("users", data['defender'], index="username")
         if not defender:  # Does the defender exist in the database?
             return BadRequest(description="Defender does not exist in database.")
 
-        character = self.db.get_all("characters", data['challenge_config']['character'], "name")
+        character = self.db.get_all("characters", data['challenge_config']['character'], index="name")
         if not character:  # Does the character exist in the database?
             return BadRequest(description="Character does not exist.")
 

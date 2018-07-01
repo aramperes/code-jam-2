@@ -20,7 +20,7 @@ class UserListResource(BaseResource):
 
         for user in self.db.run(user_query):
 
-            main_query = self.db.get_all("games", user, "challenger_username")
+            main_query = self.db.get_all("games", user, index="challenger_username")
 
             if main_query["challenger_username"]:
                 final_data[user] = {
@@ -30,7 +30,7 @@ class UserListResource(BaseResource):
                 continue
 
 
-            secondary_query = self.db.get_all("games", user, "defender_username")
+            secondary_query = self.db.get_all("games", user, index="defender_username")
 
             if main_query["defender_username"]:
                 final_data[user] = {

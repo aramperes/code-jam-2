@@ -9,8 +9,8 @@ class ChallengeDecisionResource(BaseResource):
     Used to challenge another user to a game.
     Required data:
     {
-    "id": string # TODO: Momo, is this an int or a string?
-    "decision": boolean
+    "id": string
+    "accept": boolean
     # OPTIONAL KEYS BELOW
     "character": string
     }
@@ -23,24 +23,34 @@ class ChallengeDecisionResource(BaseResource):
     def post(self):
         
         data = request.json or {}
+        active_game = self.db.query("games").filter(
+            (rethinkdb.row["defender_username"] == self.user_data['username']) | 
+            (rethinkdb.row["challenger_username"] == self.user_data['username'])
+        ).coerce_to("array")
+
         try:
-            if self.db.query("challenges").get(data["id"]).run()["defender_username"] != self.user_data["username"]:
+            if self.db.run(self.db.query("challenges").get(data["id"]))["defender_username"] != self.user_data["username"]:
                 return BadRequest(description="This challenge is not directed towards you!")
         except ValueError:
             return BadRequest(description="This challenge does not exist!")
 
         try:
-            if bool(data["decision"]):
-                self.db.query("challenges").get(data["id"]).delete().run()
+            if not bool(data["accept"]):
+                self.db.run(self.db.query("challenges").get(data["id"]).delete())
                 return {'success': True}
         except ValueError:
-            return BadRequest(description="decision must be a boolean")
+            return BadRequest(description="accept must be a boolean")
+
+        if active_game:
+            for game_entry in active_game:
+                if not game_entry['won']:
+                    return Unauthorized(description="A game is already in progress!")
 
         try:
             # All the checks succeeded and they accepted the challenge, so let's set up a document.
-            info = self.db.query("challenges").get(data["id"]).run()
-            char_challenger = self.db.query("characters").get(info["challenger_character"]).run()
-            char_defender = self.db.query("characters").get(data["character"]).run()
+            info = self.db.run(self.db.query("challenges").get(data["id"]))
+            char_challenger = self.db.run(self.db.query("characters").get(info["challenger_character"]))
+            char_defender = self.db.run(self.db.query("characters").get(data["character"]))
             document = {
                 "challenger_username": str(info["challenger_username"]),
                 "challenger_character": str(info["challenger_character"]),
@@ -61,6 +71,7 @@ class ChallengeDecisionResource(BaseResource):
                 "turn_number": 1,
                 "max_turns": int(info["max_turns"])
                 "turn": str(self.user_data["username"])
+                "won": None
             }
         except ValueError:
             BadRequest(description="Your character must exist!")
@@ -71,6 +82,6 @@ class ChallengeDecisionResource(BaseResource):
         # Run the query in the database
         self.db.run(insert_query)
         # Delete the challenge now that we've accepted it
-        self.db.query("challenges").get(data["id"]).delete().run()
+        self.db.run(self.db.query("challenges").get(data["id"]).delete())
 
         return {'success': True}

@@ -67,6 +67,7 @@ SCHEMA = {
             "turn",
             "turn_number",
             "max_turns",
+            "won"
         ]
     ),
     "challenges": TableSchema(

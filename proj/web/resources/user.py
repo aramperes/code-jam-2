@@ -17,14 +17,20 @@ class UserResource(BaseResource):
         challenges_def = self.db.query("challenges").filter({"defender_username": self.user_data["username"]}).coerce_to("array")
 
         active_game = self.db.query("games").filter(
-            (rethinkdb.row["defender_username"] == some_username) | (rethinkdb.row["challenger_username"] == self.user_data['username'])
+            (rethinkdb.row["defender_username"] == self.user_data['username']) | 
+            (rethinkdb.row["challenger_username"] == self.user_data['username'])
         ).coerce_to("array")
         game = self.db.run(active_game)
+        playing_game = None
+
+        for game_entry in game:
+            if not game_entry["won"]:
+                playing_game = game_entry
 
         return {
             "username": self.user_data["username"],
             "id": self.user_data["id"],
             "active_challenger_games": self.db.run(challenges_off),
             "active_defender_games": self.db.run(challenges_def),
-            "active_game": [game[0] if len(game) > 0 else "none"]
+            "active_game": playing_game
         }
