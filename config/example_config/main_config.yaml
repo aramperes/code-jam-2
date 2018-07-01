@@ -13,7 +13,7 @@ admin:
   username: "admin"                        #Insecure, change from example credentials.
   password: "admin"                        #Insecure, change from example credentials.
 
-user:
+game:
   max_stat_points: 20
 
 debug: true

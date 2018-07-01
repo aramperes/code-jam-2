@@ -40,19 +40,15 @@ class ChallengeResource(BaseResource):
         if not character:  # Does the character exist in the database?
             return BadRequest(description="Character does not exist.")
 
-        # Checking if the character is owned by the challenger.
-        character_ownership = self.db.query("characters").filter(lambda character: 
-            character['name'].contains(data["challenge_config"]["character"]))
-
-        if not self.db.run(character_ownership)[0]["owner"] == self.user_data["username"]:
+        if not self.db.run(character)["owner"] == self.user_data["username"]:
             return Unauthorized(description="Character does not belong to you.")
 
         # All the checks passed, let's set up a document to insert into the database.
         challenge_data = {
-                "challenger_username": self.user_data["username"],
-                "defender_username": data["defender"],
-                "challenger_character": data['challenge_config']["character"],
-                "max_turns": data['challenge_config']["max_turns"]
+                "challenger_username": str(self.user_data["username"]),
+                "defender_username": str(data["defender"]),
+                "challenger_character": str(data['challenge_config']["character"]),
+                "max_turns": str(data['challenge_config']["max_turns"])
             }
 
         # Everything checks out, so let's add their challenge to the database.

@@ -6,7 +6,7 @@ from proj.web.base_resource import BaseResource
 from proj.web.oauth import oauth
 
 
-class UserResource(BaseResource):
+class CreateCharacterResource(BaseResource):
     """
     Used to create a character. Format is:
     {
@@ -25,7 +25,7 @@ class UserResource(BaseResource):
 
     @oauth
     def post(self):
-        max_points = main_config.get("user", "max_stat_points")
+        max_points = main_config.get("game", "max_stat_points")
         data = request.json or {}
 
         if "name" not in data:
@@ -54,13 +54,13 @@ class UserResource(BaseResource):
 
         # All the checks succeeded, so let's set up a document.
         document = {
-            "owner": self.user_data["username"],
-            "name": data["name"],
-            "description": data["description"],
-            "strength": data["strength"],
-            "dexterity": data["dexterity"],
-            "health": data["health"],
-            "special": data["special"]
+            "owner": str(self.user_data["username"]),
+            "name": str(data["name"]),
+            "description": str(data["description"]),
+            "strength": int(data["strength"]),
+            "dexterity": int(data["dexterity"]),
+            "health": int(data["health"]),
+            "special": str(data["special"])
         }
 
         # Everything checks out, so let's add their character to the database.

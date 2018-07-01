@@ -5,7 +5,7 @@ from proj.web.base_resource import BaseResource
 from proj.web.oauth import oauth
 
 
-class UserResource(BaseResource):
+class UserListResource(BaseResource):
     """
     Gets information about all users.
     This route requires OAuth2 authentication.
@@ -20,15 +20,28 @@ class UserResource(BaseResource):
 
         for user in self.db.run(user_query):
 
-            if self.db.get_all("games", user, "challenger_username"):
-                final_data[user] = "In a game (challenger)"
+            main_query = self.db.get_all("games", user, "challenger_username")
+
+            if main_query["challenger_username"]:
+                final_data[user] = {
+                    "current_game": main_query["id"],
+                    "current_role": "challenger"
+                }
                 continue
 
-            elif self.db.get_all("games", user, "defender_username"):
-                final_data[user] = "In a game (defender)"
-                continue
 
-            final_data[user] = "Not in a game"
+            secondary_query = self.db.get_all("games", user, "defender_username")
+
+            if main_query["defender_username"]:
+                final_data[user] = {
+                    "current_game": main_query["id"],
+                    "current_role": "defender"
+                }
+
+            final_data[user] = {
+                "current_game": "none"
+                "current_role": "none"
+            }
 
 
         return final_data

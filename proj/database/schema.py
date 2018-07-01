@@ -64,7 +64,6 @@ SCHEMA = {
             "challenger_character_stats",
             "defender_character",
             "defender_character_stats",
-            "stats",
             "turn",
             "turn_number",
             "max_turns",
