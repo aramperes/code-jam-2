@@ -1,9 +1,9 @@
 import pytest
 from werkzeug.exceptions import BadRequest, NotFound, Unauthorized
 
-from tests.fixtures import client
+from tests.fixtures import client, log
 from tests.util import assert_json_status, store_check_auth, with_bad_auth_headers, with_auth_headers, OK_STATUS, \
-    CREDENTIALS_GOOD, CREDENTIALS_BAD, VARS, refresh_token, CREDENTIALS_ALT
+    CREDENTIALS_GOOD, CREDENTIALS_BAD, VARS, refresh_token, CREDENTIALS_ALT, from_username, other_user
 
 
 # Tests
@@ -153,6 +153,35 @@ def test_decide_challenge(client: client):
     }, headers=with_auth_headers(credentials=CREDENTIALS_ALT))
     assert_json_status(response, OK_STATUS)
     VARS["game_id"] = response.json["game_id"]
+
+
+@pytest.mark.dependency(depends=["test_decide_challenge"])
+def test_play_game(client: client):
+    # first, check if the game exists
+    response = client.get("/game/play?id={0}".format(VARS["game_id"]))
+    assert_json_status(response, OK_STATUS)
+    turn_username = response.json["data"]["turn"]
+    assert turn_username in (c["username"] for c in (CREDENTIALS_GOOD, CREDENTIALS_ALT))
+
+    turn_credentials = from_username(turn_username)
+    not_turn_credentials = other_user(credentials=turn_credentials)
+    log.debug("Turn: {0}".format(turn_credentials))
+    log.debug("Other: {0}".format(other_user(turn_credentials)))
+
+    # try to play when it isn't our turn
+    response = client.post("/game/play", json={
+        "id": VARS["game_id"],
+        "move": "grapple"
+    }, headers=with_auth_headers(credentials=not_turn_credentials))
+    assert_json_status(response, BadRequest.code)
+
+    # make a valid play
+    response = client.post("/game/play", json={
+        "id": VARS["game_id"],
+        "move": "punch"
+    }, headers=with_auth_headers(credentials=turn_credentials))
+    assert_json_status(response, OK_STATUS)
+    assert response.json["data"]["turn"] == not_turn_credentials["username"]
 
 
 # STORIES

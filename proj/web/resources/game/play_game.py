@@ -95,8 +95,10 @@ class PlayGameResource(BaseResource):
                     valid = True
                     special = True
 
+                update = None
+                updated_stats = None
                 if special:
-                    if data["move"].lower == "gamble":
+                    if data["move"].lower() == "gamble":
                         if randint(1, 2) == 1:
                             # You lose points
                             update = "attacker"
@@ -111,13 +113,13 @@ class PlayGameResource(BaseResource):
                             updated_stats["strength"] -= 1
                             updated_stats["dexterity"] -= 1
 
-                    elif data["move"].lower == "lightning bolt":
+                    elif data["move"].lower() == "lightning bolt":
 
                         update = "victim"
                         updated_stats = victim
                         updated_stats["dexterity"] -= 1
 
-                    elif data["move"].lower == "wither":
+                    elif data["move"].lower() == "wither":
                         update = "victim"
                         updated_stats = victim
                         updated_stats["strength"] -= 1
@@ -149,53 +151,54 @@ class PlayGameResource(BaseResource):
                         # Update the turn to the next person
                         self.db.run(
                             self.db.query("games").get(data["id"]).update({"turn": game["challenger_username"]}))
+                        if updated_stats:
+                            if update == "attacker":
+                                self.db.run(
+                                    self.db.query("games").get(data["id"]).update({"defender_stats": updated_stats}))
+                            else:
+                                self.db.run(
+                                    self.db.query("games").get(data["id"]).update({"challenger_stats": updated_stats}))
 
-                        if update == "attacker":
-                            self.db.run(
-                                self.db.query("games").get(data["id"]).update({"defender_stats": updated_stats}))
-                        else:
-                            self.db.run(
-                                self.db.query("games").get(data["id"]).update({"challenger_stats": updated_stats}))
+                            if special and update == "attacker":
 
-                        if special and update == "attacker":
+                                health_update = updated_stats
+                                health_update["health"] -= 1
+                                self.db.run(
+                                    self.db.query("games").get(data["id"]).update({"defender_stats": health_update}))
 
-                            health_update = updated_stats
-                            health_update["health"] -= 1
-                            self.db.run(
-                                self.db.query("games").get(data["id"]).update({"defender_stats": health_update}))
+                            elif special and update == "victim":
 
-                        elif special and update == "victim":
-
-                            health_update = attacker
-                            health_update["health"] -= 1
-                            self.db.run(
-                                self.db.query("games").get(data["id"]).update({"defender_stats": health_update}))
+                                health_update = attacker
+                                health_update["health"] -= 1
+                                self.db.run(
+                                    self.db.query("games").get(data["id"]).update({"defender_stats": health_update}))
 
                     elif self.user_data["username"] == game["challenger_username"]:
 
                         # Update the turn to the next person
                         self.db.run(self.db.query("games").get(data["id"]).update({"turn": game["defender_username"]}))
 
-                        if update == "attacker":
-                            self.db.run(
-                                self.db.query("games").get(data["id"]).update({"challenger_stats": updated_stats}))
-                        else:
-                            self.db.run(
-                                self.db.query("games").get(data["id"]).update({"defender_stats": updated_stats}))
+                        if updated_stats:
+                            if update == "attacker":
+                                self.db.run(
+                                    self.db.query("games").get(data["id"]).update({"challenger_stats": updated_stats}))
+                            else:
+                                self.db.run(
+                                    self.db.query("games").get(data["id"]).update({"defender_stats": updated_stats}))
 
-                        if special and update == "attacker":
+                            if special and update == "attacker":
 
-                            health_update = updated_stats
-                            health_update["health"] -= 1
-                            self.db.run(
-                                self.db.query("games").get(data["id"]).update({"challenger_stats": health_update}))
+                                health_update = updated_stats
+                                health_update["health"] -= 1
+                                self.db.run(
+                                    self.db.query("games").get(data["id"]).update({"challenger_stats": health_update}))
 
-                        elif special and update == "victim":
+                            elif special and update == "victim":
 
-                            health_update = attacker
-                            health_update["health"] -= 1
-                            self.db.run(
-                                self.db.query("games").get(data["id"]).update({"challenger_stats": health_update}))
+                                health_update = attacker
+                                health_update["health"] -= 1
+                                self.db.run(
+                                    self.db.query("games").get(data["id"]).update({"challenger_stats": health_update}))
 
                     # Increase the turn counter by one
                     self.db.run(self.db.query("games").get(data["id"]).update({"turn_number": game["turn_number"] + 1}))
@@ -216,26 +219,24 @@ class PlayGameResource(BaseResource):
                         "success": True,
                         "data": self.db.get_doc("games", data['id'])
                     }
+            else:
+                raise BadRequest(description="It is not your turn.")
 
             raise BadRequest(description="Please enter a valid move.")
 
         except ValueError:
             raise BadRequest(description="A move is required!")
 
-    @oauth(force=True)
     def get(self):
-
-        try:
-            data = request.json or {}
-            game = self.db.get_doc("games", data["id"])
-
-            if not game:
-                raise BadRequest(description="Game not found.")
-
-            return {
-                "success": True,
-                "data": game
-            }
-
-        except ValueError:
+        game_id = request.args.get("id", type=str)
+        if not game_id:
             raise BadRequest(description="Please enter an ID.")
+
+        game = self.db.get_doc("games", game_id)
+        if not game:
+            raise BadRequest(description="Game not found.")
+
+        return {
+            "success": True,
+            "data": game
+        }

@@ -19,6 +19,17 @@ CREDENTIALS_ALT = {
 }
 
 
+def other_user(credentials=None, username=None):
+    if credentials:
+        return CREDENTIALS_ALT if credentials["username"] == CREDENTIALS_GOOD["username"] else CREDENTIALS_GOOD
+    elif username:
+        return other_user(credentials=from_username(username))
+
+
+def from_username(username):
+    return CREDENTIALS_GOOD if username == CREDENTIALS_GOOD["username"] else CREDENTIALS_ALT
+
+
 def assert_json_status(response, code):
     assert response.is_json
     log.debug(response.json)
