@@ -1,7 +1,7 @@
 import pytest
 from werkzeug.exceptions import BadRequest, NotFound, Unauthorized
 
-from tests.fixtures import client, log
+from tests.fixtures import client
 from tests.util import assert_json_status, store_check_auth, with_bad_auth_headers, with_auth_headers, OK_STATUS, \
     CREDENTIALS_GOOD, CREDENTIALS_BAD, VARS, refresh_token, CREDENTIALS_ALT, from_username, other_user
 
@@ -165,8 +165,6 @@ def test_play_game(client: client):
 
     turn_credentials = from_username(turn_username)
     not_turn_credentials = other_user(credentials=turn_credentials)
-    log.debug("Turn: {0}".format(turn_credentials))
-    log.debug("Other: {0}".format(other_user(turn_credentials)))
 
     # try to play when it isn't our turn
     response = client.post("/game/play", json={

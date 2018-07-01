@@ -91,11 +91,14 @@ class PlayGameResource(BaseResource):
                     if attacker["dexterity"] + randint(-5, 5) > victim["dexterity"] + randint(-5, 5):
                         win = True
 
-                elif data["move"].lower() in ("lightning bolt", "wither", "gamble"):
+                elif data["move"].lower() in ("lightning", "wither", "gamble"):
+                    # Check if the character can use this special ability
+                    if attacker["special"] != data["move"].lower():
+                        raise BadRequest("You cannot use this ability, "
+                                         "because your character's special ability is {0}".format(attacker["special"]))
                     valid = True
                     special = True
 
-                update = None
                 updated_stats = None
                 if special:
                     if data["move"].lower() == "gamble":
@@ -113,7 +116,7 @@ class PlayGameResource(BaseResource):
                             updated_stats["strength"] -= 1
                             updated_stats["dexterity"] -= 1
 
-                    elif data["move"].lower() == "lightning bolt":
+                    elif data["move"].lower() == "lightning":
 
                         update = "victim"
                         updated_stats = victim
