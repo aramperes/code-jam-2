@@ -21,6 +21,9 @@ class ConfigShim(Config):
             "debug": True,
             "stories": {
                 "ffmpeg": os.environ.get("FFMPEG_EXEC", default="ffmpeg")
+            },
+            "game": {
+                "max_stat_points": 20
             }
         }
 

@@ -1,9 +1,9 @@
 import pytest
 from werkzeug.exceptions import BadRequest, NotFound, Unauthorized
 
-from tests.fixtures import client
+from tests.fixtures import client, log
 from tests.util import assert_json_status, store_check_auth, with_bad_auth_headers, with_auth_headers, OK_STATUS, \
-    CREDENTIALS_GOOD, CREDENTIALS_BAD, VARS
+    CREDENTIALS_GOOD, CREDENTIALS_BAD, VARS, refresh_token, CREDENTIALS_ALT, from_username, other_user
 
 
 # Tests
@@ -27,6 +27,10 @@ def test_register(client: client):
     response = client.post("/auth/register", json=CREDENTIALS_GOOD)
     assert_json_status(response, OK_STATUS)
 
+    # register alt with credentials
+    response = client.post("/auth/register", json=CREDENTIALS_ALT)
+    assert_json_status(response, OK_STATUS)
+
 
 @pytest.mark.dependency(depends=["test_register"])
 def test_login(client: client):
@@ -41,7 +45,12 @@ def test_login(client: client):
     # successful login
     response = client.post("/auth/login", json=CREDENTIALS_GOOD)
     assert_json_status(response, OK_STATUS)
-    store_check_auth(response)
+    store_check_auth(response, credentials=CREDENTIALS_GOOD)
+
+    # successful alt login
+    response = client.post("/auth/login", json=CREDENTIALS_ALT)
+    assert_json_status(response, OK_STATUS)
+    store_check_auth(response, credentials=CREDENTIALS_ALT)
 
 
 @pytest.mark.dependency(depends=["test_login"])
@@ -55,7 +64,7 @@ def test_refresh_token(client: client):
     assert_json_status(response, Unauthorized.code)
 
     # refresh token with correct token
-    response = client.post("/auth/refresh", json={"refresh_token": VARS["oauth"]["refresh_token"]})
+    response = client.post("/auth/refresh", json={"refresh_token": refresh_token()})
     assert_json_status(response, OK_STATUS)
     store_check_auth(response)
 
@@ -74,6 +83,108 @@ def test_use_auth(client: client):
     response = client.get("/me", headers=with_auth_headers())
     assert_json_status(response, OK_STATUS)
     assert response.json["username"] == CREDENTIALS_GOOD["username"]
+
+
+@pytest.mark.dependency(depends=["test_login"])
+def test_user_list(client: client):
+    response = client.get("/users")
+    assert_json_status(response, OK_STATUS)
+
+
+# GAME
+
+@pytest.mark.dependency(depends=["test_login"])
+def test_create_character(client: client):
+    # create a character with too much stats
+    response = client.post("/game/create_character", json={
+        "name": "good",
+        "description": "good",
+        "strength": 10,
+        "dexterity": 10,
+        "health": 10,
+        "special": "lightning"
+    }, headers=with_auth_headers())
+    assert_json_status(response, BadRequest.code)
+
+    # create a character for "GOOD"
+    response = client.post("/game/create_character", json={
+        "name": "good",
+        "description": "good",
+        "strength": 5,
+        "dexterity": 10,
+        "health": 5,
+        "special": "lightning"
+    }, headers=with_auth_headers(credentials=CREDENTIALS_GOOD))
+    assert_json_status(response, OK_STATUS)
+
+    # create a character for "ALT"
+    response = client.post("/game/create_character", json={
+        "name": "alt",
+        "description": "alt",
+        "strength": 10,
+        "dexterity": 1,
+        "health": 9,
+        "special": "wither"
+    }, headers=with_auth_headers(credentials=CREDENTIALS_ALT))
+    assert_json_status(response, OK_STATUS)
+
+
+@pytest.mark.dependency(depends=["test_create_character"])
+def test_create_challenge(client: client):
+    # send a challenge from GOOD to ALT
+    response = client.post("/game/challenge", json={
+        "defender": CREDENTIALS_ALT["username"],
+        "challenge_config": {
+            "max_turns": 5,
+            "character": "good"
+        }
+    }, headers=with_auth_headers())
+    assert_json_status(response, OK_STATUS)
+    VARS["challenge_id"] = response.json["challenge_id"]
+
+
+@pytest.mark.dependency(depends=["test_create_challenge"])
+def test_decide_challenge(client: client):
+    # accept the challenge as ALT
+    response = client.post("/game/challenge/decide", json={
+        "id": VARS["challenge_id"],
+        "accept": True,
+        "character": "alt"
+    }, headers=with_auth_headers(credentials=CREDENTIALS_ALT))
+    assert_json_status(response, OK_STATUS)
+    VARS["game_id"] = response.json["game_id"]
+
+
+@pytest.mark.dependency(depends=["test_decide_challenge"])
+def test_play_game(client: client):
+    # first, check if the game exists
+    response = client.get("/game/play?id={0}".format(VARS["game_id"]))
+    assert_json_status(response, OK_STATUS)
+    turn_username = response.json["data"]["turn"]
+    assert turn_username in (c["username"] for c in (CREDENTIALS_GOOD, CREDENTIALS_ALT))
+
+    turn_credentials = from_username(turn_username)
+    not_turn_credentials = other_user(credentials=turn_credentials)
+    log.debug("Turn: {0}".format(turn_credentials))
+    log.debug("Other: {0}".format(other_user(turn_credentials)))
+
+    # try to play when it isn't our turn
+    response = client.post("/game/play", json={
+        "id": VARS["game_id"],
+        "move": "grapple"
+    }, headers=with_auth_headers(credentials=not_turn_credentials))
+    assert_json_status(response, BadRequest.code)
+
+    # make a valid play
+    response = client.post("/game/play", json={
+        "id": VARS["game_id"],
+        "move": "punch"
+    }, headers=with_auth_headers(credentials=turn_credentials))
+    assert_json_status(response, OK_STATUS)
+    assert response.json["data"]["turn"] == not_turn_credentials["username"]
+
+
+# STORIES
 
 
 @pytest.mark.dependency(depends=["test_login"])
