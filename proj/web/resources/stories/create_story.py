@@ -9,7 +9,7 @@ import rethinkdb
 from ffmpy import FFmpeg
 from flask import request
 from gtts import gTTS
-from werkzeug.exceptions import ServiceUnavailable
+from werkzeug.exceptions import Forbidden, ServiceUnavailable
 
 from proj.web.base_resource import BaseResource
 from proj.web.oauth import oauth
@@ -23,6 +23,17 @@ class CreateStoryResource(BaseResource):
 
     @oauth(force=True)
     def post(self):
+        # first of all, check if the user has reached their quota
+        if not self.web_app.debug:
+            quota = int(self.web_app.config.get("stories", "max_story_count", default=10))
+            stories_query = self.db.query("stories").get_all(
+                self.user_data["id"], index="user_id").pluck().limit(quota).count()
+            count = self.db.run(stories_query)
+            if count >= quota:
+                raise Forbidden(description="You have exceeded your quota of {0} stories. "
+                                            "Use the 'DELETE /story/<story_id> to clean up your stories.'"
+                                .format(quota))
+
         data = request.json or {}
         # optional parameter: public (true/false), default true
         # optional parameter: music (true/false), default true
