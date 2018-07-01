@@ -51,5 +51,44 @@ SCHEMA = {
             "media",
             "media_type"
         )
+    ),
+    "characters": TableSchema(
+        primary_key="id",
+        keys=(
+            "id",
+            "owner",
+            "name",
+            "description",
+            "strength",
+            "dexterity",
+            "health",
+            "special"
+        )
+    ),
+    "games": TableSchema(
+        primary_key="id",
+        keys=(
+            "id",
+            "challenger_username",
+            "defender_username",
+            "challenger_character",
+            "challenger_character_stats",
+            "defender_character",
+            "defender_character_stats",
+            "turn",
+            "turn_number",
+            "max_turns",
+            "won"
+        )
+    ),
+    "challenges": TableSchema(
+        primary_key="id",
+        keys=(
+            "id",
+            "challenger_username",
+            "defender_username",
+            "challenger_character",
+            "max_turns"
+        )
     )
 }

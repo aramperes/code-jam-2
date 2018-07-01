@@ -12,6 +12,10 @@ from proj.web.resources.auth.refresh import RefreshTokenResource
 from proj.web.resources.auth.register import RegisterResource
 from proj.web.resources.debug.config import DebugConfigResource
 from proj.web.resources.debug.database import DebugDatabaseResource
+from proj.web.resources.game.challenge import ChallengeResource
+from proj.web.resources.game.create_character import CreateCharacterResource
+from proj.web.resources.game.decide_challenge import DecideChallengeResource
+from proj.web.resources.game.play_game import PlayGameResource
 from proj.web.resources.index import IndexResource
 from proj.web.resources.stories.create_story import CreateStoryResource
 from proj.web.resources.stories.explore_stories import ExploreStoriesResource
@@ -44,7 +48,6 @@ class WebApp:
         self.api = Api(catch_all_404s=True)
         self.register_resources()
         self.api.init_app(self.app)
-        print()
 
     def register_resources(self):
         """
@@ -69,6 +72,12 @@ class WebApp:
         self.register_resource(PlayStoryResource)
         self.register_resource(StoryResource)
         self.register_resource(ExploreStoriesResource)
+
+        # Game Resources
+        self.register_resource(ChallengeResource)
+        self.register_resource(DecideChallengeResource)
+        self.register_resource(CreateCharacterResource)
+        self.register_resource(PlayGameResource)
 
         # Debug resources
         if self.debug:
