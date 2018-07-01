@@ -1,5 +1,4 @@
 # Live variables
-from tests.fixtures import log
 
 VARS = {}
 
@@ -32,7 +31,6 @@ def from_username(username):
 
 def assert_json_status(response, code):
     assert response.is_json
-    log.debug(response.json)
     assert response.status_code == code
 
 
