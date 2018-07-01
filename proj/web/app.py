@@ -14,6 +14,7 @@ from proj.web.resources.debug.config import DebugConfigResource
 from proj.web.resources.debug.database import DebugDatabaseResource
 from proj.web.resources.index import IndexResource
 from proj.web.resources.stories.create_story import CreateStoryResource
+from proj.web.resources.stories.explore_stories import ExploreStoriesResource
 from proj.web.resources.stories.list_own_stories import ListOwnStoriesResource
 from proj.web.resources.stories.list_user_stories import ListUserStoriesResource
 from proj.web.resources.stories.play_story import PlayStoryResource
@@ -67,6 +68,7 @@ class WebApp:
         self.register_resource(CreateStoryResource)
         self.register_resource(PlayStoryResource)
         self.register_resource(StoryResource)
+        self.register_resource(ExploreStoriesResource)
 
         # Debug resources
         if self.debug:

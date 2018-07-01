@@ -120,13 +120,13 @@ def test_list_own_stories(client: client):
 @pytest.mark.dependency(depends=["test_create_story"])
 def test_list_user_stories(client: client):
     # list public stories (without auth)
-    response = client.get("/stories/{0}".format(CREDENTIALS_GOOD["username"]))
+    response = client.get("/stories/user/{0}".format(CREDENTIALS_GOOD["username"]))
     assert_json_status(response, OK_STATUS)
     for story in response.json:
         assert story["public"] is True
 
     # list all stories (with auth)
-    response = client.get("/stories/{0}".format(CREDENTIALS_GOOD["username"]), headers=with_auth_headers())
+    response = client.get("/stories/user/{0}".format(CREDENTIALS_GOOD["username"]), headers=with_auth_headers())
     assert_json_status(response, OK_STATUS)
 
 

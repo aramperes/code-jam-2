@@ -6,7 +6,7 @@ from proj.web.oauth import oauth
 
 class ListUserStoriesResource(BaseResource):
     name = "api.stories.list.user"
-    url = "/stories/<string:username>"
+    url = "/stories/user/<string:username>"
 
     @oauth(force=False)
     def get(self, username):
