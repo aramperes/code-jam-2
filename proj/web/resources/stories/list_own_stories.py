@@ -11,7 +11,7 @@ class ListOwnStoriesResource(BaseResource):
         user_id = self.user_data["id"]
         # get the user's stories
         stories_query = self.db.query("stories").get_all(
-            user_id, index="user_id").pluck("id", "public", "sentences").coerce_to("array")
+            user_id, index="user_id").pluck("id", "public", "sentences", "media_type").coerce_to("array")
         stories = self.db.run(stories_query)
         for story in stories:
             story["media"] = "/story/{0}/play".format(story["id"])

@@ -163,7 +163,7 @@ class CreateStoryResource(BaseResource):
         insert_query = self.db.query("stories").insert(story_insert_doc)
         story_id = self.db.run(insert_query)["generated_keys"][0]
 
-        story_query = self.db.query("stories").get(story_id).pluck("id", "public", "sentences")
+        story_query = self.db.query("stories").get(story_id).pluck("id", "public", "sentences", "media_type")
         story = self.db.run(story_query)
         story["media"] = "/story/{0}/play".format(story_id)
         story["url"] = "/story/{0}".format(story_id)

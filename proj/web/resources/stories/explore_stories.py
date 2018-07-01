@@ -16,7 +16,7 @@ class ExploreStoriesResource(BaseResource):
             raise BadRequest(description="'max' arg must be between 0 and 10, inclusively.")
 
         stories_query = self.db.query("stories").filter({"public": True}).sample(param_max).pluck(
-            "id", "public", "sentences", "user_id").coerce_to("array")
+            "id", "public", "sentences", "user_id", "media_type").coerce_to("array")
         stories = self.db.run(stories_query)
         for story in stories:
             author = self.db.get_doc("users", story["user_id"])["username"]
