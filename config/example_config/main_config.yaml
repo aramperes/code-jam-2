@@ -19,4 +19,8 @@ user:
 debug: true
 
 stories:
+  # Path to FFMPEG executable
   ffmpeg: "/path/to/ffmpeg/executable"
+  # Max story count per user.
+  # Note: this is ignored when 'debug' is set to true
+  max_story_count: 10

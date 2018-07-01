@@ -28,6 +28,7 @@ class WebApp:
 
     def __init__(self, config: Config):
         self.config = config
+        self.debug = bool(self.config.get("debug", default=False))
 
         # Database setup
         self.db = DatabaseManager(config)
@@ -42,6 +43,7 @@ class WebApp:
         self.api = Api(catch_all_404s=True)
         self.register_resources()
         self.api.init_app(self.app)
+        print()
 
     def register_resources(self):
         """
@@ -67,7 +69,7 @@ class WebApp:
         self.register_resource(StoryResource)
 
         # Debug resources
-        if self.config.get("debug") is True:
+        if self.debug:
             self.register_resource(DebugDatabaseResource)
             self.register_resource(DebugConfigResource)
 

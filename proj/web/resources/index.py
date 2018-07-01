@@ -9,4 +9,16 @@ class IndexResource(BaseResource):
     name = "api.index"
 
     def get(self):
-        return {}
+        # list all available resources
+        resources = []
+        for resource in self.web_app.api.resources:
+            resource = resource[0]
+            data = {
+                "name": resource.name,
+                "url": resource.url,
+                "methods": list(resource.methods)
+            }
+            resources.append(data)
+        return {
+            "resources": resources
+        }
