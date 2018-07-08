@@ -1,4 +1,4 @@
-from proj.web.base_resource import BaseResource
+from proj.web.api.base_resource import BaseResource
 
 
 class UserListResource(BaseResource):

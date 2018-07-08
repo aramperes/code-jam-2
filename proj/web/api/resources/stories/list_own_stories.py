@@ -1,5 +1,5 @@
-from proj.web.base_resource import BaseResource
-from proj.web.oauth import oauth
+from proj.web.api.base_resource import BaseResource
+from proj.web.api.oauth import oauth
 
 
 class ListOwnStoriesResource(BaseResource):

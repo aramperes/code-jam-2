@@ -1,0 +1,81 @@
+html, body {
+    height: 100%;
+}
+
+.page-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: calc(100% - 275px);
+}
+
+.console-content {
+    z-index: 0;
+    flex-grow: 1;
+    overflow: auto;
+}
+
+.console-box {
+    width: 100%;
+    background-color: white;
+    height: 275px;
+    display: flex;
+    flex-flow: column;
+    z-index: 100;
+}
+
+.console-header {
+    align-items: center;
+    background-color: #fff;
+    border-top: 1px solid #d3d3d3;
+    box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.12);
+    display: flex;
+    height: 30px;
+    z-index: 8;
+}
+
+.console-log {
+    background-color: #333333;
+    height: 100%;
+    color: white;
+    font-family: monospace;
+    z-index: 0;
+    overflow: hidden auto;
+    font-size: 13px;
+}
+
+.console-line {
+    color: #DDDDDD;
+    margin: 15px 10px 5px 10px;
+    line-height: 10px;
+}
+
+.console-line .method {
+    font-weight: bold;
+    color: white;
+}
+
+.console-line .err {
+    color: #ff1461;
+}
+
+.console-line .success {
+    color: #59d86a;
+}
+
+.console-line .expand {
+    font-size: 11px;
+    margin-left: 15px;
+    padding: 2px 5px 1px 5px;
+    border-radius: 3px;
+    background-color: #444444;
+    cursor: pointer;
+}
+
+.console-line .expand:hover {
+    background-color: #555555;
+}
+
+.console-line .comment {
+    color: #888888;
+}

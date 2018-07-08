@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Defiant Sails API Console</title>
+
+    <link rel="stylesheet" href="/console/static/css/uikit.min.css">
+    <link rel="stylesheet" href="/console/static/css/console.css">
+    <script type="application/javascript" src="/console/static/js/uikit.min.js"></script>
+</head>
+<body>
+<div class="page-wrapper">
+    <div uk-sticky="sel-target: .uk-navbar-container; cls-active: uk-navbar-sticky">
+        <nav class="uk-navbar-container" uk-navbar>
+            <div class="uk-navbar-left">
+                <a href="/console" class="uk-navbar-item uk-logo">Defiant Sails API Console</a>
+            </div>
+            <div class="uk-navbar-center">
+                <ul class="uk-navbar-nav">
+                    <li class="uk-active"><a href="#">Mythological Stories</a></li>
+                    <li><a href="#">Arena Battle</a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+
+    <div class="uk-flex uk-padding-small console-content">
+        <div class="uk-section uk-padding-small uk-flex-column uk-width-1-2@s uk-width-1-3@xl uk-margin-right uk-margin-left">
+            <h3>Authentication</h3>
+            <div class="uk-card uk-card-default uk-card-body uk-margin-bottom">
+                <p class="uk-text-bold" id="auth_status_title">
+                    You are not currently authenticated.
+                </p>
+                <p id="auth_status_description">
+                    Use the actions below to authenticate your requests.
+                </p>
+            </div>
+            <div class="uk-card uk-card-default uk-margin-bottom">
+                <div class="uk-card-body uk-padding-small">
+                    <ul uk-accordion>
+                        <li>
+                            <a class="uk-card-title uk-accordion-title" href="#">Login</a>
+                            <div class="uk-accordion-content">
+                                <p>
+                                    Generates an OAuth access token for the given credentials.
+                                </p>
+                                <p><strong>Required Fields</strong></p>
+                                <div class="uk-margin">
+                                    <input class="uk-input" type="text" placeholder="Username" id="username_auth_login">
+                                </div>
+                                <div class="uk-margin">
+                                    <input class="uk-input" type="password" placeholder="Password"
+                                           id="password_auth_login">
+                                </div>
+                                <p>
+                                    <strong>Endpoint: </strong> <code>POST /api/auth/login</code>
+                                </p>
+                                <p>
+                                    <button class="uk-button uk-button-primary execute-endpoint"
+                                            endpoint="/api/auth/login">Execute
+                                    </button>
+                                </p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="uk-section uk-flex-column uk-padding-small uk-flex-stretch uk-width-1-2@s uk-width-2-3@xl uk-margin-right uk-margin-left">
+            <h3>Mythological Stories</h3>
+            <div class="uk-card uk-card-default uk-margin-bottom">
+                <div class="uk-card-body uk-padding-small">
+                    <ul uk-accordion>
+                        <li>
+                            <a class="uk-card-title uk-accordion-title" href="#">Create Story</a>
+                            <div class="uk-accordion-content">
+                                <p>
+                                    Creates a mythological story, and optionally recites it with TTS, background music
+                                    and video.
+                                </p>
+                                <p>
+                                    <strong>Options</strong><br>
+                                    <label><input class="uk-checkbox" type="checkbox" checked> Music</label><br>
+                                    <label><input class="uk-checkbox" type="checkbox" checked> Video</label><br>
+                                    <label><input class="uk-checkbox" type="checkbox" checked> Public</label><br>
+                                </p>
+                                <p>
+                                    <strong>Endpoint: </strong> <code>POST /api/story</code>
+                                </p>
+                                <p>
+                                    <button class="uk-button uk-button-primary">Execute</button>
+                                </p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="console-box">
+    <div class="console-header">
+
+    </div>
+    <div class="console-log" id="console-log"></div>
+</div>
+
+<script src="/console/static/js/jquery.min.js" type="application/javascript"></script>
+
+<script type="application/javascript">
+    function logComment(log, comment) {
+        log.append(`
+        <p class="console-line"><span class="comment">###&nbsp;&nbsp;${comment}</span></p>
+        `);
+    }
+
+    function logOutbound(log, id, method, route) {
+        log.append(`
+         <p class="console-line">&gt;&gt;&gt;&nbsp;&nbsp;<span class="method">${method.toUpperCase()}</span>&nbsp;${route}<span
+                        class="expand">${id}</span></p>
+        `);
+    }
+
+    function logInbound(log, id, code, description, route) {
+        let status = `<span class="success">${code} ${description.toUpperCase()}</span>`;
+        if (code >= 400) {
+            status = `<span class="err">${code} ${description.toUpperCase()}</span>`;
+        }
+
+        log.append(`
+          <p class="console-line">&lt;&lt;&lt;&nbsp;&nbsp;${status}&nbsp;${route}<span
+                        class="expand">${id}</span></p>
+        `);
+        log.scrollTop(10000);
+    }
+
+    function execQuery(endpoint, ajax) {
+        let requestId = ++requestIncrement;
+        logOutbound(console_log, requestId, ajax["method"] || ajax["type"] || "get", endpoint);
+        $.ajax(
+            endpoint,
+            ajax
+        ).done(function (data, _, xhr) {
+            logInbound(console_log, requestId, xhr.status, xhr.statusText || "?", endpoint);
+        }).fail(function (xhr) {
+            logInbound(console_log, requestId, xhr.status, xhr.statusText || "?", endpoint);
+        });
+    }
+
+    const console_log = $("#console-log");
+    let requestIncrement = 0;
+
+    let AUTH_USERNAME = null;
+    let AUTH_ACCESS_TOKEN = null;
+    let AUTH_ACCESS_TOKEN_EXPIRES = null;
+    let AUTH_REFRESH_TOKEN = null;
+
+    function authenticate(username, access_token, expiration, refresh_token) {
+        AUTH_USERNAME = username;
+        AUTH_ACCESS_TOKEN = access_token;
+        AUTH_ACCESS_TOKEN_EXPIRES = expiration;
+        AUTH_REFRESH_TOKEN = refresh_token;
+
+        $("#auth_status_title").html(`You are currently authenticated as ${username}.`);
+        $("#auth_status_description").html("All requests you make in this API console will now be authenticated.");
+    }
+
+    $(document).ready(() => {
+        logComment(console_log, "API Console Output");
+
+        // /api/auth/login
+        $(".execute-endpoint[endpoint='/api/auth/login']").on("click", () => {
+            let username = $("#username_auth_login").val();
+            let password = $("#password_auth_login").val();
+
+            execQuery("/api/auth/login", {
+                type: "POST",
+                data: JSON.stringify({
+                    username: username,
+                    password: password
+                }),
+                contentType: 'application/json',
+                success: (data) => {
+                    let access_token = data["access_token"];
+                    let expires = data["expires"];
+                    let refresh_token = data["refresh_token"];
+                    authenticate(username, access_token, expires, refresh_token);
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

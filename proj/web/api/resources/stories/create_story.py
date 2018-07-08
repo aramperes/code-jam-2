@@ -12,8 +12,8 @@ from flask import request
 from gtts import gTTS
 from werkzeug.exceptions import BadRequest, Forbidden, ServiceUnavailable
 
-from proj.web.base_resource import BaseResource
-from proj.web.oauth import oauth
+from proj.web.api.base_resource import BaseResource
+from proj.web.api.oauth import oauth
 
 log = logging.getLogger(__name__)
 

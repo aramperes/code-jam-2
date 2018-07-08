@@ -2,8 +2,8 @@ import bcrypt
 from flask import request
 from werkzeug.exceptions import BadRequest, Unauthorized
 
-from proj.web.base_resource import BaseResource
-from proj.web.oauth import OAuthAccessToken, OAuthRefreshToken
+from proj.web.api.base_resource import BaseResource
+from proj.web.api.oauth import OAuthAccessToken, OAuthRefreshToken
 
 
 class LoginResource(BaseResource):

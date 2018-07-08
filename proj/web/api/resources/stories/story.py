@@ -2,8 +2,8 @@ from flask import request
 from rethinkdb import ReqlNonExistenceError
 from werkzeug.exceptions import NotFound, Unauthorized
 
-from proj.web.base_resource import BaseResource
-from proj.web.oauth import oauth
+from proj.web.api.base_resource import BaseResource
+from proj.web.api.oauth import oauth
 
 
 class StoryResource(BaseResource):

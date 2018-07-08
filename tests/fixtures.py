@@ -44,7 +44,7 @@ def client(request):
             log.warning("Dropped temporary test database {0}".format(db_name))
 
     web = WebApp(config)
-    test_client = web.app.test_client()
+    test_client = web.flask_app.test_client()
 
     def teardown():
         with web.db.connect() as conn:
