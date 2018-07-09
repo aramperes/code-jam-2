@@ -282,8 +282,11 @@
                               Your browser does not support the video tag.
                             </audio>`)
                     );
+                    modal.find("[uk-accordion]").on("hidden", (e) => {
+                        e.stopPropagation();
+                    });
                     UIkit.modal(modal).show();
-                    modal.on("hide", () => {
+                    modal.on("hidden", () => {
                         modal.remove();
                     });
                 }
