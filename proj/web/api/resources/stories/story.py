@@ -28,8 +28,8 @@ class StoryResource(BaseResource):
             "public": story["public"],
             "sentences": story["sentences"],
             "author": author,
-            "url": "/story/{0}".format(story_id),
-            "media": "/story/{0}/play".format(story_id),
+            "url": "/api/story/{0}".format(story_id),
+            "media": "/api/story/{0}/play".format(story_id),
             "media_type": story["media_type"]
         }
 

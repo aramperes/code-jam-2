@@ -5,7 +5,7 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Defiant Sails API Console</title>
+    <title>API Console</title>
 
     <link rel="stylesheet" href="/console/static/css/uikit.min.css">
     <link rel="stylesheet" href="/console/static/css/console.css">
@@ -16,7 +16,7 @@
     <div uk-sticky="sel-target: .uk-navbar-container; cls-active: uk-navbar-sticky">
         <nav class="uk-navbar-container" uk-navbar>
             <div class="uk-navbar-left">
-                <a href="/console" class="uk-navbar-item uk-logo">Defiant Sails API Console</a>
+                <a href="/console" class="uk-navbar-item uk-logo uk-margin-left">API Console</a>
             </div>
             <div class="uk-navbar-center">
                 <ul class="uk-navbar-nav">
@@ -60,7 +60,7 @@
                                 </p>
                                 <p>
                                     <button class="uk-button uk-button-primary execute-endpoint"
-                                            endpoint="/api/auth/login">Execute
+                                            endpoint="GET /api/auth/login">Execute
                                     </button>
                                 </p>
                             </div>
@@ -69,7 +69,7 @@
                 </div>
             </div>
         </div>
-        <div class="uk-section uk-flex-column uk-padding-small uk-flex-stretch uk-width-1-2@s uk-width-2-3@xl uk-margin-right uk-margin-left">
+        <div class="uk-section uk-flex-column uk-padding-small uk-flex-stretch uk-margin-right uk-margin-left uk-width-expand">
             <h3>Mythological Stories</h3>
             <div class="uk-card uk-card-default uk-margin-bottom">
                 <div class="uk-card-body uk-padding-small">
@@ -83,15 +83,20 @@
                                 </p>
                                 <p>
                                     <strong>Options</strong><br>
-                                    <label><input class="uk-checkbox" type="checkbox" checked> Music</label><br>
-                                    <label><input class="uk-checkbox" type="checkbox" checked> Video</label><br>
-                                    <label><input class="uk-checkbox" type="checkbox" checked> Public</label><br>
+                                    <label><input class="uk-checkbox" type="checkbox" checked id="music_create_story">
+                                        Music</label><br>
+                                    <label><input class="uk-checkbox" type="checkbox" checked id="video_create_story">
+                                        Video</label><br>
+                                    <label><input class="uk-checkbox" type="checkbox" checked id="public_create_story">
+                                        Public</label><br>
                                 </p>
                                 <p>
                                     <strong>Endpoint: </strong> <code>POST /api/story</code>
                                 </p>
                                 <p>
-                                    <button class="uk-button uk-button-primary">Execute</button>
+                                    <button class="uk-button uk-button-primary execute-endpoint"
+                                            endpoint="POST /api/story">Execute
+                                    </button>
                                 </p>
                             </div>
                         </li>
@@ -103,9 +108,33 @@
 </div>
 <div class="console-box">
     <div class="console-header">
-
+        <button id="clear-console" class="uk-button uk-button-default uk-button-small">Clear</button>
     </div>
     <div class="console-log" id="console-log"></div>
+</div>
+
+<div id="story-info-modal" uk-modal>
+    <div class="uk-modal-dialog uk-modal-body">
+        <h2 class="uk-modal-title">Story</h2>
+        <p><code>{api_id}</code></p>
+        <ul uk-accordion="multiple: true">
+            <li>
+                <a class="uk-accordion-title" href="#">Story Content</a>
+                <div class="uk-accordion-content">
+                    <p>{sentences}</p>
+                </div>
+            </li>
+            <li>
+                <a class="uk-accordion-title" href="#">Media ({media_type})</a>
+                <div class="uk-accordion-content">
+                    {media}
+                </div>
+            </li>
+        </ul>
+        <p class="uk-text-right">
+            <button class="uk-button uk-button-default uk-modal-close" type="button">Close</button>
+        </p>
+    </div>
 </div>
 
 <script src="/console/static/js/jquery.min.js" type="application/javascript"></script>
@@ -137,16 +166,41 @@
         log.scrollTop(10000);
     }
 
-    function execQuery(endpoint, ajax) {
+    function enableExecuteButton(button) {
+        button.addClass("uk-button-primary");
+        button.removeClass("uk-background-muted");
+        button.removeClass("uk-disabled");
+        button.removeClass("uk-button-default");
+        button.html('Execute');
+    }
+
+    function disableExecuteButton(button) {
+        button.removeClass("uk-button-primary");
+        button.addClass("uk-background-muted");
+        button.addClass("uk-disabled");
+        button.addClass("uk-button-default");
+        button.html('<div uk-spinner="ratio: 0.7"></div>');
+    }
+
+    function execQuery(endpoint, ajax, button) {
+        if (AUTH_ACCESS_TOKEN) {
+            let headers = ajax["headers"] || {};
+            headers["Authorization"] = `Bearer ${AUTH_ACCESS_TOKEN}`;
+            ajax["headers"] = headers;
+        }
+
         let requestId = ++requestIncrement;
         logOutbound(console_log, requestId, ajax["method"] || ajax["type"] || "get", endpoint);
+        disableExecuteButton(button);
         $.ajax(
             endpoint,
             ajax
         ).done(function (data, _, xhr) {
             logInbound(console_log, requestId, xhr.status, xhr.statusText || "?", endpoint);
+            enableExecuteButton(button);
         }).fail(function (xhr) {
             logInbound(console_log, requestId, xhr.status, xhr.statusText || "?", endpoint);
+            enableExecuteButton(button);
         });
     }
 
@@ -168,11 +222,17 @@
         $("#auth_status_description").html("All requests you make in this API console will now be authenticated.");
     }
 
+    $("#clear-console").on("click", () => {
+        console_log.html("");
+        requestIncrement = 0;
+    });
+
     $(document).ready(() => {
-        logComment(console_log, "API Console Output");
+        logComment(console_log, "HTTP Console Output");
 
         // /api/auth/login
-        $(".execute-endpoint[endpoint='/api/auth/login']").on("click", () => {
+        const auth_login_button = $(".execute-endpoint[endpoint='GET /api/auth/login']");
+        auth_login_button.on("click", () => {
             let username = $("#username_auth_login").val();
             let password = $("#password_auth_login").val();
 
@@ -189,7 +249,45 @@
                     let refresh_token = data["refresh_token"];
                     authenticate(username, access_token, expires, refresh_token);
                 }
-            });
+            }, auth_login_button);
+        });
+
+        const create_story_button = $(".execute-endpoint[endpoint='POST /api/story']");
+        create_story_button.on("click", () => {
+            let music = $("#music_create_story").is(':checked');
+            let video = $("#video_create_story").is(':checked');
+            let is_public = $("#public_create_story").is(':checked');
+
+            execQuery("/api/story", {
+                type: "POST",
+                data: JSON.stringify({
+                    music: music,
+                    video: video,
+                    "public": is_public
+                }),
+                contentType: 'application/json',
+                success(data) {
+                    const modal = $("#story-info-modal").clone().off().attr("id", null);
+                    modal.html(
+                        modal.html().replace("{api_id}", data["id"])
+                            .replace("{sentences}", data["sentences"].join(" "))
+                            .replace("{media_type}", data["media_type"])
+                            .replace("{media}", data["media_type"].startsWith("audio") ? `
+                            <audio controls>
+                              <source src="${data["media"]}" type="${data["media_type"]}">
+                              Your browser does not support the audio tag.
+                            </audio>` : `
+                            <video controls>
+                              <source src="${data["media"]}" type="${data["media_type"]}">
+                              Your browser does not support the video tag.
+                            </audio>`)
+                    );
+                    UIkit.modal(modal).show();
+                    modal.on("hide", () => {
+                        modal.remove();
+                    });
+                }
+            }, create_story_button);
         });
     });
 </script>

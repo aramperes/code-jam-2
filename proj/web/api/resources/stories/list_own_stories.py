@@ -14,6 +14,6 @@ class ListOwnStoriesResource(BaseResource):
             user_id, index="user_id").pluck("id", "public", "sentences", "media_type").coerce_to("array")
         stories = self.db.run(stories_query)
         for story in stories:
-            story["media"] = "/story/{0}/play".format(story["id"])
-            story["url"] = "/story/{0}".format(story["id"])
+            story["media"] = "/api/story/{0}/play".format(story["id"])
+            story["url"] = "/api/story/{0}".format(story["id"])
         return stories

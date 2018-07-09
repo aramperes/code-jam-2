@@ -185,6 +185,6 @@ class CreateStoryResource(BaseResource):
 
         story_query = self.db.query("stories").get(story_id).pluck("id", "public", "sentences", "media_type")
         story = self.db.run(story_query)
-        story["media"] = "/story/{0}/play".format(story_id)
-        story["url"] = "/story/{0}".format(story_id)
+        story["media"] = "/api/story/{0}/play".format(story_id)
+        story["url"] = "/api/story/{0}".format(story_id)
         return story

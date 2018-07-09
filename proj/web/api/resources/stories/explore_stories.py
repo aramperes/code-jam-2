@@ -21,7 +21,7 @@ class ExploreStoriesResource(BaseResource):
         for story in stories:
             author = self.db.get_doc("users", story["user_id"])["username"]
             story["author"] = author
-            story["media"] = "/story/{0}/play".format(story["id"])
-            story["url"] = "/story/{0}".format(story["id"])
+            story["media"] = "/api/story/{0}/play".format(story["id"])
+            story["url"] = "/api/story/{0}".format(story["id"])
 
         return stories
