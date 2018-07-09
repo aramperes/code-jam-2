@@ -6,7 +6,7 @@ from proj.web.api.resources.stories.list_common import list_stories
 
 
 class ListOwnStoriesResource(BaseResource):
-    name = "api.stories.list.own"
+    name = "stories.list.own"
     url = "/stories"
 
     @oauth(force=True)

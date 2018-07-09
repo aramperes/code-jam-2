@@ -19,7 +19,7 @@ class CreateCharacterResource(BaseResource):
     This route requires OAuth2 authentication.
     """
     url = "/game/create_character"
-    name = "api.game.create_character"
+    name = "game.create_character"
 
     @oauth(force=True)
     def post(self):

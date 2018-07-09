@@ -10,7 +10,7 @@ class UserResource(BaseResource):
     This route requires OAuth2 authentication.
     """
     url = "/me"
-    name = "api.user.me"
+    name = "user.me"
 
     @oauth(force=True)
     def get(self):

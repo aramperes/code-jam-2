@@ -61,7 +61,39 @@
                                 </p>
                                 <p>
                                     <button class="uk-button uk-button-primary execute-endpoint"
-                                            endpoint="GET /api/auth/login">Execute
+                                            endpoint="POST /api/auth/login">Execute
+                                    </button>
+                                </p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="uk-card uk-card-default uk-margin-bottom">
+                <div class="uk-card-body uk-padding-small">
+                    <ul uk-accordion>
+                        <li>
+                            <a class="uk-card-title uk-accordion-title" href="#">Register</a>
+                            <div class="uk-accordion-content">
+                                <p>
+                                    Registers an account which can be used to create OAuth tokens using the <i>Login</i>
+                                    endpoint.
+                                </p>
+                                <p><strong>Required Fields</strong></p>
+                                <div class="uk-margin">
+                                    <input class="uk-input" type="text" placeholder="Username"
+                                           id="username_auth_register">
+                                </div>
+                                <div class="uk-margin">
+                                    <input class="uk-input" type="password" placeholder="Password"
+                                           id="password_auth_register">
+                                </div>
+                                <p>
+                                    <strong>Endpoint: </strong> <code>POST /api/auth/register</code>
+                                </p>
+                                <p>
+                                    <button class="uk-button uk-button-primary execute-endpoint"
+                                            endpoint="POST /api/auth/register">Execute
                                     </button>
                                 </p>
                             </div>
@@ -237,7 +269,7 @@
         AUTH_ACCESS_TOKEN_EXPIRES = expiration;
         AUTH_REFRESH_TOKEN = refresh_token;
 
-        $("#auth_status_title").html(`You are currently authenticated as ${username}.`);
+        $("#auth_status_title").html(`You are currently authenticated as <i>${username}</i>.`);
         $("#auth_status_description").html("All requests you make in this API console will now be authenticated.");
         $("#auth_status_card").removeClass("card-err").addClass("card-success");
     }
@@ -281,7 +313,7 @@
         logComment(console_log, "HTTP Console Output");
 
         // /api/auth/login
-        const auth_login_button = $(".execute-endpoint[endpoint='GET /api/auth/login']");
+        const auth_login_button = $(".execute-endpoint[endpoint='POST /api/auth/login']");
         auth_login_button.on("click", () => {
             let username = $("#username_auth_login").val();
             let password = $("#password_auth_login").val();
@@ -300,6 +332,24 @@
                     authenticate(username, access_token, expires, refresh_token);
                 }
             }, auth_login_button);
+        });
+
+        const auth_register_button = $(".execute-endpoint[endpoint='POST /api/auth/register']");
+        auth_register_button.on("click", () => {
+            let username = $("#username_auth_register").val();
+            let password = $("#password_auth_register").val();
+
+            execQuery("/api/auth/register", {
+                type: "POST",
+                data: JSON.stringify({
+                    username: username,
+                    password: password
+                }),
+                contentType: 'application/json',
+                success: () => {
+                    UIkit.notification("Account created succesfully.", {status:'primary'})
+                }
+            }, auth_register_button);
         });
 
         const create_story_button = $(".execute-endpoint[endpoint='POST /api/story']");

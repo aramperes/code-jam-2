@@ -19,7 +19,7 @@ class ChallengeResource(BaseResource):
     This route requires OAuth2 authentication.
     """
     url = "/game/challenge"
-    name = "api.game.challenge"
+    name = "game.challenge"
 
     @oauth(force=True)
     def post(self):

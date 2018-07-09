@@ -24,7 +24,7 @@ class PlayGameResource(BaseResource):
     This route requires OAuth2 authentication.
     """
     url = "/game/play"
-    name = "api.game.play"
+    name = "game.play"
 
     @oauth(force=True)
     def post(self):

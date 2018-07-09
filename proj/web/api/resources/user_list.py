@@ -6,7 +6,7 @@ class UserListResource(BaseResource):
     Gets information about all users.
     """
     url = "/users"
-    name = "api.user.list"
+    name = "user.list"
 
     def get(self):
         final_data = []

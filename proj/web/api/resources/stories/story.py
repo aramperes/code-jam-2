@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, url_for
 from rethinkdb import ReqlNonExistenceError
 from werkzeug.exceptions import NotFound, Unauthorized
 
@@ -7,7 +7,7 @@ from proj.web.api.oauth import oauth
 
 
 class StoryResource(BaseResource):
-    name = "api.stories.story"
+    name = "stories.story"
     url = "/story/<string:story_id>"
 
     @oauth(force=False)
@@ -28,8 +28,8 @@ class StoryResource(BaseResource):
             "public": story["public"],
             "sentences": story["sentences"],
             "author": author,
-            "url": "/api/story/{0}".format(story_id),
-            "media": "/api/story/{0}/play".format(story_id),
+            "url": url_for("api.stories.story", story_id=story_id),
+            "media": url_for("api.stories.play", story_id=story_id),
             "media_type": story["media_type"]
         }
 

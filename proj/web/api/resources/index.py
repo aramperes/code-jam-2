@@ -6,7 +6,7 @@ class IndexResource(BaseResource):
     The index endpoint (/).
     """
     url = "/"
-    name = "api.index"
+    name = "index"
 
     def get(self):
         # list all available resources

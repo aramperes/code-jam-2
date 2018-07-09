@@ -5,7 +5,7 @@ from proj.web.api.base_resource import BaseResource
 
 
 class ListCorpusStoriesResource(BaseResource):
-    name = "api.stories.corpus"
+    name = "stories.corpus"
     url = "/stories/corpus"
 
     def get(self):

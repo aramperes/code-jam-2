@@ -11,7 +11,7 @@ class LoginResource(BaseResource):
     The login endpoint (/auth/login).
     """
     url = "/auth/login"
-    name = "api.auth.login"
+    name = "auth.login"
 
     def post(self):
         data = request.json or {}

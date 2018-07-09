@@ -10,7 +10,7 @@ class RefreshTokenResource(BaseResource):
     The endpoint to create new OAuth access tokens from refresh tokens. (/auth/refresh)
     """
     url = "/auth/refresh"
-    name = "api.auth.refresh"
+    name = "auth.refresh"
 
     def post(self):
         data = request.json or {}

@@ -7,7 +7,7 @@ from proj.web.api.resources.stories.list_common import list_stories
 
 
 class ListUserStoriesResource(BaseResource):
-    name = "api.stories.list.user"
+    name = "stories.list.user"
     url = "/stories/user/<string:username>"
 
     @oauth(force=False)

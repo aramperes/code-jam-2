@@ -7,7 +7,7 @@ from proj.web.api.oauth import oauth
 
 
 class PlayStoryResource(BaseResource):
-    name = "api.stories.play"
+    name = "stories.play"
     url = "/story/<string:story_id>/play"
 
     @oauth(force=False)

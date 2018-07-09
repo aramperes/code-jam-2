@@ -7,7 +7,7 @@ import subprocess
 import markovify
 import rethinkdb
 from ffmpy import FFmpeg
-from flask import request
+from flask import request, url_for
 from gtts import gTTS
 from werkzeug.exceptions import BadRequest, Forbidden, ServiceUnavailable
 
@@ -19,7 +19,7 @@ log = logging.getLogger(__name__)
 
 
 class CreateStoryResource(BaseResource):
-    name = "api.stories.create"
+    name = "stories.create"
     url = "/story"
 
     @oauth(force=True)
@@ -182,6 +182,6 @@ class CreateStoryResource(BaseResource):
 
         story_query = self.db.query("stories").get(story_id).pluck("id", "public", "sentences", "media_type")
         story = self.db.run(story_query)
-        story["media"] = "/api/story/{0}/play".format(story_id)
-        story["url"] = "/api/story/{0}".format(story_id)
+        story["url"] = url_for("api.stories.story", story_id=story_id)
+        story["media"] = url_for("api.stories.play", story_id=story_id)
         return story

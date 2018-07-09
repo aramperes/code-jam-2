@@ -10,7 +10,7 @@ class RegisterResource(BaseResource):
     The register endpoint (/auth/register).
     """
     url = "/auth/register"
-    name = "api.auth.register"
+    name = "auth.register"
 
     def post(self):
         data = request.json or {}
