@@ -267,6 +267,11 @@
                 }),
                 contentType: 'application/json',
                 success(data) {
+                    let media_url = new URL(data["media"], window.location.href);
+                    if (!is_public) {
+                        media_url.searchParams.append("access_token", AUTH_ACCESS_TOKEN);
+                    }
+
                     const modal = $("#story-info-modal").clone().off().attr("id", null);
                     modal.html(
                         modal.html().replace("{api_id}", data["id"])
@@ -274,11 +279,11 @@
                             .replace("{media_type}", data["media_type"])
                             .replace("{media}", data["media_type"].startsWith("audio") ? `
                             <audio controls>
-                              <source src="${data["media"]}" type="${data["media_type"]}">
+                              <source src="${media_url.href}" type="${data["media_type"]}">
                               Your browser does not support the audio tag.
                             </audio>` : `
                             <video controls>
-                              <source src="${data["media"]}" type="${data["media_type"]}">
+                              <source src="${media_url.href}" type="${data["media_type"]}">
                               Your browser does not support the video tag.
                             </audio>`)
                     );

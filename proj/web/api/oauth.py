@@ -43,21 +43,26 @@ def oauth(force):
         def inner(self, *args, **kwargs):
             self.authenticated = False
             self.user_data = None
-            headers = dict(request.headers)
-            if "Authorization" not in headers:
-                if force:
-                    raise Unauthorized(description="This resource requires authentication.")
-                else:
-                    return f(self, *args, **kwargs)
 
-            auth_header = headers["Authorization"].split(" ", maxsplit=1)
-            if len(auth_header) is not 2 or auth_header[0] != "Bearer":
-                if force:
-                    raise Unauthorized(description="Invalid Authorization header.")
-                else:
-                    return f(self, *args, **kwargs)
+            # check if the GET parameter (access_token) isn't supplied
+            if "access_token" not in request.args:
+                headers = dict(request.headers)
+                if "Authorization" not in headers:
+                    if force:
+                        raise Unauthorized(description="This resource requires authentication.")
+                    else:
+                        return f(self, *args, **kwargs)
 
-            bearer_token = auth_header[1]
+                auth_header = headers["Authorization"].split(" ", maxsplit=1)
+                if len(auth_header) is not 2 or auth_header[0] != "Bearer":
+                    if force:
+                        raise Unauthorized(description="Invalid Authorization header.")
+                    else:
+                        return f(self, *args, **kwargs)
+                bearer_token = auth_header[1]
+            else:
+                bearer_token = request.args.get("access_token", type=str)
+
             # Check if the token exists
             token_doc = self.db.get_doc("oauth_tokens", bearer_token)
             if not token_doc:
