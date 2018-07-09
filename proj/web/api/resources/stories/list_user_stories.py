@@ -1,7 +1,9 @@
+from flask import request
 from werkzeug.exceptions import NotFound
 
 from proj.web.api.base_resource import BaseResource
 from proj.web.api.oauth import oauth
+from proj.web.api.resources.stories.list_common import list_stories
 
 
 class ListUserStoriesResource(BaseResource):
@@ -17,11 +19,8 @@ class ListUserStoriesResource(BaseResource):
         user = user_list[0]
 
         is_self = self.authenticated and user["id"] == self.user_data["id"]
-        stories_query = self.db.query("stories").get_all(
-            user["id"], index="user_id").filter({"public": None if is_self else True}).pluck(
-            "id", "public", "sentences", "media_type").coerce_to("array")
-        stories = self.db.run(stories_query)
-        for story in stories:
-            story["media"] = "/api/story/{0}/play".format(story["id"])
-            story["url"] = "/api/story/{0}".format(story["id"])
-        return stories
+
+        summary_mode = "summary" in request.args
+
+        # get the user's stories
+        return list_stories(self, user["id"], is_self, summary_mode)

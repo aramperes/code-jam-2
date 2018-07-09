@@ -54,7 +54,6 @@ class WebApp:
         root_path = os.getcwd()
         console_static_dir = os.path.join(root_path, "static")
         console_templates_dir = os.path.join(root_path, "templates", "console")
-        print(root_path, console_static_dir, console_templates_dir)
         self.blueprint_console = Blueprint("console", __name__, url_prefix="/console",
                                            root_path=root_path,
                                            template_folder=console_templates_dir, static_folder=console_static_dir)
