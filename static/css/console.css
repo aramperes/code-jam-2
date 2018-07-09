@@ -60,11 +60,19 @@ html, body {
 }
 
 .console-line .err {
-    color: #ff1461;
+    color: #ff594d;
 }
 
 .console-line .success {
     color: #59d86a;
+}
+
+.card-err {
+    border: solid 2px #c95c63;
+}
+
+.card-success {
+    border: solid 2px #58abd8;
 }
 
 .console-line .expand {

@@ -19,6 +19,7 @@ from proj.web.api.resources.game.create_character import CreateCharacterResource
 from proj.web.api.resources.game.decide_challenge import ChallengeDecisionResource
 from proj.web.api.resources.game.play_game import PlayGameResource
 from proj.web.api.resources.index import IndexResource
+from proj.web.api.resources.stories.corpus import ListCorpusStoriesResource
 from proj.web.api.resources.stories.create_story import CreateStoryResource
 from proj.web.api.resources.stories.explore_stories import ExploreStoriesResource
 from proj.web.api.resources.stories.list_own_stories import ListOwnStoriesResource
@@ -97,6 +98,7 @@ class WebApp:
         self.register_api_resource(PlayStoryResource)
         self.register_api_resource(StoryResource)
         self.register_api_resource(ExploreStoriesResource)
+        self.register_api_resource(ListCorpusStoriesResource)
 
         # Game Resources
         self.register_api_resource(ChallengeResource)

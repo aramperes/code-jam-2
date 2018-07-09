@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/console/static/css/uikit.min.css">
     <link rel="stylesheet" href="/console/static/css/console.css">
     <script type="application/javascript" src="/console/static/js/uikit.min.js"></script>
+    <script type="application/javascript" src="/console/static/js/uikit-icons.min.js"></script>
 </head>
 <body>
 <div class="page-wrapper">
@@ -30,7 +31,7 @@
     <div class="uk-flex uk-padding-small console-content">
         <div class="uk-section uk-padding-small uk-flex-column uk-width-1-2@s uk-width-1-3@xl uk-margin-right uk-margin-left">
             <h3>Authentication</h3>
-            <div class="uk-card uk-card-default uk-card-body uk-margin-bottom">
+            <div class="uk-card uk-card-default uk-card-body uk-margin-bottom card-err" id="auth_status_card">
                 <p class="uk-text-bold" id="auth_status_title">
                     You are not currently authenticated.
                 </p>
@@ -81,15 +82,36 @@
                                     Creates a mythological story, and optionally recites it with TTS, background music
                                     and video.
                                 </p>
-                                <p>
-                                    <strong>Options</strong><br>
-                                    <label><input class="uk-checkbox" type="checkbox" checked id="music_create_story">
-                                        Music</label><br>
-                                    <label><input class="uk-checkbox" type="checkbox" checked id="video_create_story">
-                                        Video</label><br>
-                                    <label><input class="uk-checkbox" type="checkbox" checked id="public_create_story">
-                                        Public</label><br>
-                                </p>
+                                <form class="uk-form-stacked">
+                                    <div class="uk-margin">
+                                        <label class="uk-form-label">Options</label>
+                                        <div class="uk-form-controls">
+                                            <label><input class="uk-checkbox" type="checkbox" checked
+                                                          id="music_create_story">
+                                                Music</label><br>
+                                            <label><input class="uk-checkbox" type="checkbox" checked
+                                                          id="video_create_story">
+                                                Video</label><br>
+                                            <label><input class="uk-checkbox" type="checkbox" checked
+                                                          id="public_create_story">
+                                                Public</label><br>
+                                        </div>
+                                    </div>
+                                    <div class="uk-margin">
+                                        <div class="uk-form-label">Corpus</div>
+                                        <div class="uk-form-controls">
+                                            <select class="uk-select uk-form-width-medium" id="corpus_create_story">
+                                                {% for corpus in functions.list_corpus() %}
+                                                    {% if corpus == "mixed" %}
+                                                        <option selected="selected">{{ corpus }}</option>
+                                                    {% else %}
+                                                        <option>{{ corpus }}</option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </form>
                                 <p>
                                     <strong>Endpoint: </strong> <code>POST /api/story</code>
                                 </p>
@@ -220,6 +242,37 @@
 
         $("#auth_status_title").html(`You are currently authenticated as ${username}.`);
         $("#auth_status_description").html("All requests you make in this API console will now be authenticated.");
+        $("#auth_status_card").removeClass("card-err").addClass("card-success");
+    }
+
+    function openStory(data) {
+        let media_url = new URL(data["media"], window.location.href);
+        if (!data["public"]) {
+            media_url.searchParams.append("access_token", AUTH_ACCESS_TOKEN);
+        }
+
+        const modal = $("#story-info-modal").clone().off().attr("id", null);
+        modal.html(
+            modal.html().replace("{api_id}", data["id"])
+                .replace("{sentences}", data["sentences"].join(" "))
+                .replace("{media_type}", data["media_type"])
+                .replace("{media}", data["media_type"].startsWith("audio") ? `
+                            <audio controls>
+                              <source src="${media_url.href}" type="${data["media_type"]}">
+                              Your browser does not support the audio tag.
+                            </audio>` : `
+                            <video controls>
+                              <source src="${media_url.href}" type="${data["media_type"]}">
+                              Your browser does not support the video tag.
+                            </audio>`)
+        );
+        modal.find("[uk-accordion]").on("hidden", (e) => {
+            e.stopPropagation();
+        });
+        UIkit.modal(modal).show();
+        modal.on("hidden", () => {
+            modal.remove();
+        });
     }
 
     $("#clear-console").on("click", () => {
@@ -257,43 +310,19 @@
             let music = $("#music_create_story").is(':checked');
             let video = $("#video_create_story").is(':checked');
             let is_public = $("#public_create_story").is(':checked');
+            let corpus = $("#corpus_create_story").val();
 
             execQuery("/api/story", {
                 type: "POST",
                 data: JSON.stringify({
                     music: music,
                     video: video,
-                    "public": is_public
+                    "public": is_public,
+                    corpus: corpus
                 }),
                 contentType: 'application/json',
                 success(data) {
-                    let media_url = new URL(data["media"], window.location.href);
-                    if (!is_public) {
-                        media_url.searchParams.append("access_token", AUTH_ACCESS_TOKEN);
-                    }
-
-                    const modal = $("#story-info-modal").clone().off().attr("id", null);
-                    modal.html(
-                        modal.html().replace("{api_id}", data["id"])
-                            .replace("{sentences}", data["sentences"].join(" "))
-                            .replace("{media_type}", data["media_type"])
-                            .replace("{media}", data["media_type"].startsWith("audio") ? `
-                            <audio controls>
-                              <source src="${media_url.href}" type="${data["media_type"]}">
-                              Your browser does not support the audio tag.
-                            </audio>` : `
-                            <video controls>
-                              <source src="${media_url.href}" type="${data["media_type"]}">
-                              Your browser does not support the video tag.
-                            </audio>`)
-                    );
-                    modal.find("[uk-accordion]").on("hidden", (e) => {
-                        e.stopPropagation();
-                    });
-                    UIkit.modal(modal).show();
-                    modal.on("hidden", () => {
-                        modal.remove();
-                    });
+                    openStory(data);
                 }
             }, create_story_button);
         });

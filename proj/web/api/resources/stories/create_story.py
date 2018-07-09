@@ -1,4 +1,3 @@
-import glob
 import io
 import logging
 import os
@@ -14,6 +13,7 @@ from werkzeug.exceptions import BadRequest, Forbidden, ServiceUnavailable
 
 from proj.web.api.base_resource import BaseResource
 from proj.web.api.oauth import oauth
+from proj.web.api.resources.stories.corpus import list_corpus
 
 log = logging.getLogger(__name__)
 
@@ -46,11 +46,8 @@ class CreateStoryResource(BaseResource):
         video = bool(data.get("video", True))
         corpus_param = str(data.get("corpus", "mixed"))
 
-        # all available corpus
         corpus_dir = os.path.join(".", "assets", "texts")
-        corpus_glob = os.path.join(corpus_dir, "*.txt")
-        corpus_names = [os.path.splitext(os.path.basename(path))[0] for path in glob.glob(corpus_glob)]
-
+        corpus_names = list_corpus()
         if not corpus_names:
             raise ServiceUnavailable(description="Corpus is unavailable.")
 
