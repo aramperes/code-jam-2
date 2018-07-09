@@ -101,12 +101,9 @@
                                         <div class="uk-form-label">Corpus</div>
                                         <div class="uk-form-controls">
                                             <select class="uk-select uk-form-width-medium" id="corpus_create_story">
+                                                <option selected="selected">mixed</option>
                                                 {% for corpus in functions.list_corpus() %}
-                                                    {% if corpus == "mixed" %}
-                                                        <option selected="selected">{{ corpus }}</option>
-                                                    {% else %}
-                                                        <option>{{ corpus }}</option>
-                                                    {% endif %}
+                                                    <option>{{ corpus }}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>
