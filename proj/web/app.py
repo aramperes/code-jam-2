@@ -30,6 +30,7 @@ from proj.web.api.resources.user import UserResource
 from proj.web.api.resources.user_list import UserListResource
 from proj.web.console.base_view import BaseView
 from proj.web.console.views.index import ConsoleIndexView
+from proj.web.landing import LandingView
 
 
 class WebApp:
@@ -47,16 +48,19 @@ class WebApp:
         self.db.migrate()
 
         # Flask setup
-        self.flask_app = Flask(__name__)
+        root_path = os.getcwd()
+        static_dir = os.path.join(root_path, "static")
+        templates_dir = os.path.join(root_path, "templates")
+        self.flask_app = Flask(__name__,
+                               root_path=root_path,
+                               template_folder=templates_dir,
+                               static_folder=static_dir)
         self.db.attach_flask(self.flask_app)
         self.blueprint_api = Blueprint("api", __name__, url_prefix="/api")
-
-        root_path = os.getcwd()
-        console_static_dir = os.path.join(root_path, "static")
-        console_templates_dir = os.path.join(root_path, "templates", "console")
         self.blueprint_console = Blueprint("console", __name__, url_prefix="/console",
                                            root_path=root_path,
-                                           template_folder=console_templates_dir, static_folder=console_static_dir)
+                                           template_folder=os.path.join(templates_dir, "console"),
+                                           static_folder=static_dir)
 
         # Flask-RESTful setup
         self.api = Api()
@@ -65,6 +69,9 @@ class WebApp:
 
         # Console setup
         self.register_console_view(ConsoleIndexView)
+
+        # Landing page setup
+        self.register_landing_view()
 
         # Finally, register the blueprints
         self.flask_app.register_blueprint(self.blueprint_api)
@@ -127,6 +134,9 @@ class WebApp:
         class_setup = view_class.setup(self)
         endpoint = view_class.name
         self.blueprint_console.add_url_rule(class_setup.url, view_func=class_setup.as_view(endpoint))
+
+    def register_landing_view(self):
+        self.flask_app.add_url_rule("/", view_func=LandingView().as_view("landing"))
 
     def serve(self):
         """
