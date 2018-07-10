@@ -14,7 +14,7 @@ CREDENTIALS_BAD = {
 }
 
 CREDENTIALS_ALT = {
-    "username": "foo", "password": "bar"
+    "username": "another", "password": "person"
 }
 
 

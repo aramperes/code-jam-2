@@ -1,8 +1,17 @@
+import re
+
 import bcrypt
 from flask import request
 from werkzeug.exceptions import BadRequest, Unauthorized
 
 from proj.web.api.base_resource import BaseResource
+
+USERNAME_REGEX = re.compile(r"^([0-9a-zA-Z_]+$)")
+USERNAME_LENGTH_MIN = 4
+USERNAME_LENGTH_MAX = 12
+
+PASSWORD_LENGTH_MIN = 2
+PASSWORD_LENGTH_MAX = 64
 
 
 class RegisterResource(BaseResource):
@@ -21,9 +30,18 @@ class RegisterResource(BaseResource):
         username = str(data["username"])
         password = str(data["password"])
 
-        # First, let's check if the username is already taken
-        # To do that, we want to check if there is already a document with that username inside it.
-        # So, we want to count how many users have that username. If not 0, then someone is already taking it.
+        # Check if the username and password are valid
+        if not (USERNAME_LENGTH_MIN <= len(username) <= USERNAME_LENGTH_MAX):
+            raise BadRequest(description=f"Username must be between {USERNAME_LENGTH_MIN}"
+                                         f" and {USERNAME_LENGTH_MAX} characters long.")
+        if not USERNAME_REGEX.fullmatch(username):
+            raise BadRequest(description="Username contains illegal characters.")
+
+        if not (PASSWORD_LENGTH_MIN <= len(password) <= PASSWORD_LENGTH_MAX):
+            raise BadRequest(description=f"Password must be between {PASSWORD_LENGTH_MIN}"
+                                         f" and {PASSWORD_LENGTH_MAX} characters long.")
+
+        # Check if the username is taken
         users = self.db.get_all("users", username, index="username", limit=1)
         username_taken = len(users) > 0
         if username_taken:

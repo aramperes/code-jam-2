@@ -91,3 +91,28 @@ html, body {
 .console-line .comment {
     color: #888888;
 }
+
+.console-line .inline-comment {
+    color: #888888;
+    font-style: italic;
+}
+
+.story-list-container {
+    min-height: 100px;
+    max-height: 300px;
+    width: 100%;
+    border: solid 1px #DDDDDD;
+    overflow: hidden auto;
+    text-align: center;
+}
+
+.story-list-item {
+    display: inline-block;
+    padding: 15px;
+    margin: 10px;
+    max-width: 40%;
+}
+
+.execute-endpoint {
+    margin-bottom: 0;
+}
