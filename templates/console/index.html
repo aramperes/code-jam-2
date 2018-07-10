@@ -194,8 +194,16 @@
 
 <div id="story-info-modal" uk-modal>
     <div class="uk-modal-dialog uk-modal-body">
-        <h2 class="uk-modal-title">Story</h2>
-        <p><code>{api_id}</code></p>
+        <h2 class="uk-modal-title">
+            Story
+            <button class="uk-button uk-button-danger uk-button-small uk-float-right uk-modal-close delete-story">
+                Delete
+            </button>
+        </h2>
+        <p>
+            {visibility}
+            <code>{api_id}</code>
+        </p>
         <ul uk-accordion="multiple: true">
             <li>
                 <a class="uk-accordion-title" href="#">Story Content</a>
@@ -246,15 +254,21 @@
         log.scrollTop(10000);
     }
 
-    function enableExecuteButton(button) {
+    function enableExecuteButton(button, content = "Execute") {
+        if (!button) {
+            return;
+        }
         button.addClass("uk-button-primary");
         button.removeClass("uk-background-muted");
         button.removeClass("uk-disabled");
         button.removeClass("uk-button-default");
-        button.html('Execute');
+        button.html(content);
     }
 
     function disableExecuteButton(button) {
+        if (!button) {
+            return;
+        }
         button.removeClass("uk-button-primary");
         button.addClass("uk-background-muted");
         button.addClass("uk-disabled");
@@ -263,6 +277,7 @@
     }
 
     function execQuery(endpoint, ajax, button) {
+        let button_content = button ? button.html() : null;
         if (AUTH_ACCESS_TOKEN) {
             let headers = ajax["headers"] || {};
             headers["Authorization"] = `Bearer ${AUTH_ACCESS_TOKEN}`;
@@ -277,14 +292,14 @@
             ajax
         ).done(function (data, _, xhr) {
             logInbound(console_log, requestId, xhr.status, xhr.statusText || "?", endpoint);
-            enableExecuteButton(button);
+            enableExecuteButton(button, button_content);
         }).fail(function (xhr) {
             let message = null;
             if (xhr["responseJSON"]) {
                 message = xhr["responseJSON"]["message"];
             }
             logInbound(console_log, requestId, xhr.status, xhr.statusText || "?", endpoint, message);
-            enableExecuteButton(button);
+            enableExecuteButton(button, button_content);
         });
     }
 
@@ -327,9 +342,18 @@
                               <source src="${media_url.href}" type="${data["media_type"]}">
                               Your browser does not support the video tag.
                             </audio>`)
+                .replace("{visibility}", data["public"] ? '<span class="uk-label uk-label-success">Public</span>' : '<span class="uk-label uk-label-warning">Private</span>')
         );
         modal.find("[uk-accordion]").on("hidden", (e) => {
             e.stopPropagation();
+        });
+        modal.find(".delete-story").on("click", (e) => {
+            execQuery(data["url"], {
+                type: "DELETE",
+                success: function () {
+                    UIkit.notification("Story deleted.", {status: 'primary'})
+                }
+            }, null);
         });
         UIkit.modal(modal).show();
         modal.on("hidden", () => {
@@ -414,7 +438,7 @@
                 data: {
                     "summary": 1
                 },
-                success(stories_array) {
+                success: function (stories_array) {
                     const ui_target_list = $("#user_own_stories_list");
                     let result_html = "";
 
@@ -432,13 +456,23 @@
                                     <i>${story_first_sentence}</i>
                                 </span>
                                 <br>
-                                <button class="uk-button uk-button-primary uk-button-small uk-margin-small-top">
+                                <button class="uk-button uk-button-primary uk-button-small uk-margin-small-top execute-endpoint" endpoint="GET /api/story/[story]" story-id="${story["id"]}">
                                     View
                                 </button>
                             </div>
                         `
                     }
                     ui_target_list.html(result_html);
+                    ui_target_list.scrollTop(0);
+                    $(".execute-endpoint[endpoint='GET /api/story/[story]']").on("click", (e) => {
+                        let button = $(e.target);
+                        execQuery(`/api/story/${button.attr("story-id")}`, {
+                            type: "GET",
+                            success: function (story_data) {
+                                openStory(story_data);
+                            }
+                        }, button);
+                    });
                     $("#user_own_stories_accordion").show();
                 }
             }, get_user_own_stories_button);
