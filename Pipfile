@@ -24,7 +24,7 @@ pytest = "*"
 pytest-dependency = "*"
 
 [requires]
-python_version = "3.6"
+python_version = "3.7"
 
 [scripts]
 test = "pytest tests -s --log-cli-level=DEBUG"
