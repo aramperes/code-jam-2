@@ -1,4 +1,4 @@
-FROM python:3.6.5-stretch
+FROM python:3.7.1-stretch
 
 ENV RETHINKDB_HOST rethinkdb
 ENV FFMPEG_EXEC /usr/bin/ffmpeg
